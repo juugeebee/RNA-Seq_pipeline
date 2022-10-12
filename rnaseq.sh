@@ -1,11 +1,18 @@
-conda activate rnaseq
+#!/usr/bin/env bash
+
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate fastq_bam_env
 
 ###############################################################################
 ##### BCL to FASTQ
 
-bcl2fastq --barcode-mismatches 0 --minimum-trimmed-read-length 35 --no-lane-splitting -R "." \
---sample-sheet "SampleSheet.csv" -o ./Fastq -r 4 -p 12 -w 4
+# bcl2fastq --barcode-mismatches 0 --minimum-trimmed-read-length 35 --no-lane-splitting -R "." \
+# --sample-sheet "SampleSheet.csv" -o ./Fastq_raw -r 4 -p 12 -w 4
 
+conda deactivate
+
+# cd Fastq_raw
+# bash ~/SCRIPTS/RNA-seq/agent_trimmer.sh
 
 ###############################################################################
 #### ALIGNEMENT
@@ -13,110 +20,67 @@ bcl2fastq --barcode-mismatches 0 --minimum-trimmed-read-length 35 --no-lane-spli
 
 ## GENERATING GENOME INDEXES
 
-genome_dir='/media/jbogoin/Data1/References/RNA-seq/STAR'
-ref='/media/jbogoin/Data1/References/fa_hg38/hg38-rnaseq/GRCh38.primary_assembly.genome.fa'
-gtf_file='/media/jbogoin/Data1/References/RNA-seq/STAR/UCSC_mRNA_EST_RefSeq.gtf'
-
-STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
- --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 99
-    
-
-## RUNNING MAPPING JOB
-
-start_end='/media/jbogoin/Data1/References/RNA-seq/STAR/sjdbList.fromGTF.out.tab'
-
-cd Fastq
-
-rm -Rf ../BAM
-
-
-## BAM
-for R1 in *_R1_001.fastq.gz; 
-    do R2=${R1/_R1/_R2}; 
-    
-    SAMPLE=${R1%%_*};
-    
-    STAR --runThreadN 12 \
-        --genomeDir $genome_dir \
-        --readFilesIn $R1 $R2 \
-        --readFilesCommand zcat \
-        --outFileNamePrefix ../BAM/$SAMPLE \
-        --outSAMtype BAM SortedByCoordinate\
-        --sjdbGTFfile $gtf_file \
-        --sjdbFileChrStartEnd $start_end;
-
-done
-
-cd ../BAM
-
-
-## DUPLICATES
-for BAM in *.bam;
-    do SAMPLE=${BAM%A*};
-
-    STAR --runThreadN 12 \
-        --limitBAMsortRAM 30000000000 \
-        --runMode inputAlignmentsFromBAM \
-        --bamRemoveDuplicatesType UniqueIdentical \
-        --inputBAMfile $BAM \
-        --outFileNamePrefix ${SAMPLE}.dedup.bam;
-
-done
-
-
-## INDEX
-parallel samtools index ::: *.dedup.bamProcessed.out.bam
-
 conda deactivate
-
-
-###############################################################################
-#### QC
-
-
-## GATK 
-conda activate gatk4
-
-# echo "Download refFlat.txt annotation file"
-# wget http://hgdownload.cse.ucsc.edu/goldenpath/hg38/database/refFlat.txt.gz
-# gunzip refFlat.txt.gz
-
-for BAM in *.dedup.bamProcessed.out.bam;
-    do SAMPLE=${BAM%.*};
-
-gatk CollectRnaSeqMetrics \
-      -I $BAM \
-      -O $SAMPLE.RNA_Metrics \
-      --REF_FLAT '/media/jbogoin/Data1/References/RNA-seq/refFlat.txt' \
-      -STRAND FIRST_READ_TRANSCRIPTION_STRAND;
-
-done
-
-conda deactivate
-
-
-## RNASeQC
 conda activate rnaseq
 
-# https://github.com/broadinstitute/gtex-pipeline/tree/master/gene_model
-# cd ~/gtex-pipeline/gene_model
-# python3 collapse_annotation.py \
-#     '/media/jbogoin/Data1/References/RNA-seq/gencode.v41.basic.annotation.gtf' 
-#     '/media/jbogoin/Data1/References/RNA-seq/gencode.v41.genes.gtf'
+genome_dir='/media/jbogoin/Data1/References/RNA-seq/STAR'
+ref='/media/jbogoin/Data1/References/fa_hg19/rna-seq/GRCh37.primary_assembly.genome.fa'
+gtf_file='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.annotation.gtf'
+refflat='/media/jbogoin/Data1/References/RNA-seq/refFlat_hg19.txt'
 
 
-for BAM in *.dedup.bamProcessed.out.bam;
-    do SAMPLE=${BAM%.*};
+# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
+#  --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 71
 
-    rnaseqc '/media/jbogoin/Data1/References/RNA-seq/gencode.v41.genes.gtf' \
-        $BAM . ;
+   
 
+## RUNNING MAPPING JOB
+# cd Fastq_trimmed
+
+for R1 in *_R1.fastq.gz; 
+    do R2=${R1/_R1_/_R2_}; 
+    SAMPLE=${R1%%_*}; 
+    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
+    DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
+    BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
+    STAR --runThreadN 16 --genomeDir $genome_dir \
+        --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
+        --readFilesCommand zcat --readFilesIn $R1 $R2 \
+        --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:Illumina-StrandedmRNA-PrepLigation_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
+        --outFileNamePrefix ${SAMPLE} \
+        --quantMode TranscriptomeSAM GeneCounts \
+        --twopassMode Basic; 
 done
 
-mkdir ../QC
-mv *.gct ../QC
-mv *_Metrics ../QC
-mv *.tsv ../QC
+# for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
 
-cd ../QC
-multiqc .
+
+# ## QC
+
+
+# for i in *Aligned.sortedByCoord.out.bam; 
+#     do sample=${i/Aligned.sortedByCoord.out.bam/}; 
+#     rnaseqc $gtf_file $i ${sample}_RNA-SeQC --sample=${sample} --stranded=rf; 
+# done
+
+
+# conda deactivate
+# conda activate gatk4
+
+# for i in *Aligned.sortedByCoord.out.bam; 
+#     do sample=${i%Aligned.sortedByCoord.out.bam}; 
+#     gatk CollectRnaSeqMetrics -I $i -O ${sample}.RNAseqMetrics.txt \
+#     --REF_FLAT $refflat \
+#     -R /$REF \
+#     -STRAND SECOND_READ_TRANSCRIPTION_STRAND; 
+# done
+
+
+
+# mkdir ../QC
+# mv *.gct ../QC
+# mv *_Metrics ../QC
+# mv *.tsv ../QC
+
+# cd ../QC
+# multiqc .
