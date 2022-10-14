@@ -1,24 +1,21 @@
 #!/usr/bin/env bash
 
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate fastq_bam_env
 
-###############################################################################
-##### BCL to FASTQ
 
-# bcl2fastq --barcode-mismatches 0 --minimum-trimmed-read-length 35 --no-lane-splitting -R "." \
-# --sample-sheet "SampleSheet.csv" -o ./Fastq_raw -r 4 -p 12 -w 4
+echo ""
+echo "rnaseq.sh start"
+echo ""
 
-conda deactivate
 
-# cd Fastq_raw
-# bash ~/SCRIPTS/RNA-seq/agent_trimmer.sh
+cd Fastq_cat
+bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
+cd ..
 
 ###############################################################################
 #### ALIGNEMENT
 ### STAR (Spliced Transcripts Alignment to a Reference)
 
-## GENERATING GENOME INDEXES
 
 conda deactivate
 conda activate rnaseq
@@ -28,14 +25,20 @@ ref='/media/jbogoin/Data1/References/fa_hg19/rna-seq/GRCh37.primary_assembly.gen
 gtf_file='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.annotation.gtf'
 refflat='/media/jbogoin/Data1/References/RNA-seq/refFlat_hg19.txt'
 
+gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.genes.gtf'
+# Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
 
-# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
-#  --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 71
+ng_target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.bed'
+ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.interval_list'
 
-   
+## GENERATING GENOME INDEXES
+
+STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
+ --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 71
+
 
 ## RUNNING MAPPING JOB
-# cd Fastq_trimmed
+cd Fastq_trimmed
 
 for R1 in *_R1.fastq.gz; 
     do R2=${R1/_R1_/_R2_}; 
@@ -52,35 +55,66 @@ for R1 in *_R1.fastq.gz;
         --twopassMode Basic; 
 done
 
-# for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
+for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
 
 
-# ## QC
+mkdir -p ../BAM
+mv !(*.gz|*.properties) ../BAM
 
 
-# for i in *Aligned.sortedByCoord.out.bam; 
-#     do sample=${i/Aligned.sortedByCoord.out.bam/}; 
-#     rnaseqc $gtf_file $i ${sample}_RNA-SeQC --sample=${sample} --stranded=rf; 
-# done
+## QC
 
 
-# conda deactivate
-# conda activate gatk4
-
-# for i in *Aligned.sortedByCoord.out.bam; 
-#     do sample=${i%Aligned.sortedByCoord.out.bam}; 
-#     gatk CollectRnaSeqMetrics -I $i -O ${sample}.RNAseqMetrics.txt \
-#     --REF_FLAT $refflat \
-#     -R /$REF \
-#     -STRAND SECOND_READ_TRANSCRIPTION_STRAND; 
-# done
+for i in *Aligned.sortedByCoord.out.bam; 
+    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
+    rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded=rf; 
+done
 
 
+conda deactivate
+conda activate gatk4
 
-# mkdir ../QC
-# mv *.gct ../QC
-# mv *_Metrics ../QC
-# mv *.tsv ../QC
+for i in *Aligned.sortedByCoord.out.bam; 
+    do sample=${i%Aligned.sortedByCoord.out.bam}; 
+    gatk CollectRnaSeqMetrics -I $i -O ${sample}.RNAseqMetrics.txt \
+    -REF_FLAT $refflat \
+    -STRAND SECOND_READ_TRANSCRIPTION_STRAND; 
+done
 
-# cd ../QC
-# multiqc .
+
+for i in *Aligned.sortedByCoord.out.bam; 
+    do sample=${i%Aligned.sortedByCoord.out.bam}; 
+    gatk CollectRnaSeqMetrics -I $i -O ${sample}.RNAseqMetrics.txt \
+    -REF_FLAT $refflat \
+    -STRAND SECOND_READ_TRANSCRIPTION_STRAND; 
+done
+
+conda deactivate
+conda activate rnaseq
+
+#Couverture totale a chaque position du bed
+for i in *Aligned.sortedByCoord.out.bam; 
+    do sample=${i%Aligned.sortedByCoord.out.bam}; 
+    gatk CollectHsMetrics \
+    -I $i \
+    -O ${sample}.hsMetrics.txt \
+    -R $ref \
+    --BAIT_INTERVALS $ng_target_il \
+    --TARGET_INTERVALS $ng_target_il;
+done
+
+
+mkdir ../QC
+mv *.RNAseqMetrics.txt ../QC
+mv *_RNA-SeQC ../QC
+mv *.hsMetrics.txt ../QC
+cd ../QC
+
+
+multiqc .
+conda deactivate
+
+
+echo ""
+echo "rnaseq.sh job done!"
+echo ""
