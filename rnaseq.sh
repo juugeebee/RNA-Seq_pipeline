@@ -8,17 +8,6 @@ echo "rnaseq.sh start"
 echo ""
 
 
-cd Fastq_cat
-echo "TRIMMER"
-echo ""
-bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
-cd ..
-
-###############################################################################
-#### ALIGNEMENT
-### STAR (Spliced Transcripts Alignment to a Reference)
-
-
 genome_dir='/media/jbogoin/Data1/References/RNA-seq/STAR'
 ref='/media/jbogoin/Data1/References/fa_hg19/rna-seq/GRCh37.primary_assembly.genome.fa'
 gtf_file='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.annotation.gtf'
@@ -30,17 +19,30 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.gene
 ng_target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.bed'
 ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.interval_list'
 
-## GENERATING GENOME INDEXES
+
+## TRIMMING DES ADATATEURS
+
+cd Fastq_cat
+echo "TRIMMER"
+echo ""
+bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
+cd ..
+
+
+## ALIGNEMENT
+## STAR (Spliced Transcripts Alignment to a Reference)
+
 
 echo "ALIGNEMENT"
 echo ""
 
 
+## GENERATING GENOME INDEXES
 STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
  --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 
-### RUNNING MAPPING JOB
+## RUNNING MAPPING JOB
 cd Fastq_trimmed
 
 for R1 in *_R1.fastq.gz; 
@@ -58,22 +60,45 @@ for R1 in *_R1.fastq.gz;
         --twopassMode Basic; 
 done
 
-for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
+conda deactivate
 
-
-mkdir -p ../BAM
-mv !(*.gz) ../BAM
-cd ../BAM
+mkdir -p ../BAM_STAR_sans_UMI
+mv !(*.gz) ../BAM_STAR_sans_UMI
+cd ../BAM_STAR_sans_UMI
 mv *.properties ../Fastq_trimmed
+
+
+## MarkDuplicates sans traitement des UMI
+
+echo "MarkDuplicates"
+echo ""
+
+conda activate gatk4
+
+for i in *Aligned.sortedByCoord.out.bam;
+    do sample=${i%Aligned.sortedByCoord.out.bam};
+    gatk MarkDuplicates \
+        -I $i \
+        -O ${sample}.marked_duplicates.bam \
+        -M ${sample}.marked_dup_metrics.txt;
+done
+
+conda deactivate
+
+
+## CREATION DES INDEXS
+
+for i in *.marked_duplicates.bam; do samtools index -@ 16 $i; done
 
 
 ## QC
 echo "RNASEQC"
 echo ""
 
+conda activate rnaseq
 
-for i in *Aligned.sortedByCoord.out.bam; 
-    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
+for i in *.marked_duplicates.bam; 
+    do sample=${i%.marked_duplicates.bam}; 
     rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded=rf; 
 done
 
@@ -87,8 +112,8 @@ echo ""
 
 
 # Couverture totale a chaque position du bed
-for i in *Aligned.sortedByCoord.out.bam; 
-    do sample=${i%Aligned.sortedByCoord.out.bam}; 
+for i in *.marked_duplicates.bam; 
+    do sample=${i%.marked_duplicates.bam}; 
     gatk CollectHsMetrics \
     -I $i \
     -O ${sample}.hsMetrics.txt \
@@ -99,34 +124,29 @@ for i in *Aligned.sortedByCoord.out.bam;
 done
 
 
-# echo "CollectRnaSeqMetrics"
-# echo ""
-
-
-#for i in *Aligned.sortedByCoord.out.bam; 
-#     do sample=${i%Aligned.sortedByCoord.out.bam}; 
-#     gatk CollectRnaSeqMetrics -I $i -O ${sample}.RNAseqMetrics.txt \
-#     -REF_FLAT $refflat \
-#     -STRAND SECOND_READ_TRANSCRIPTION_STRAND; 
-# done
-
-
-mkdir ../QC
-# mv *.RNAseqMetrics.txt ../QC
-mv *_RNA-SeQC ../QC
-mv *.hsMetrics.txt ../QC
-mv *_pertargetcoverage.txt ../QC
-cd ../QC
+mkdir ../QC_sans_UMI
+mv *_RNA-SeQC ../QC_sans_UMI
+mv *.hsMetrics.txt ../QC_sans_UMI
+mv *_pertargetcoverage.txt ../QC_sans_UMI
+cd ../QC_sans_UMI
 
 
 conda deactivate
 conda activate rnaseq
 
-
 echo "MULTIQC"
 
-
 multiqc -f .
+
+conda deactivate
+
+
+mkdir -p hsMetrics
+mv *.hsMetrics.txt hsMetrics/
+mkdir -p pertargetcoverage
+mv *_pertargetcoverage.txt pertargetcoverage/
+mkdir -p RNA-SeQC
+mv *RNA-SeQC RNA-SeQC/
 
 
 conda deactivate
