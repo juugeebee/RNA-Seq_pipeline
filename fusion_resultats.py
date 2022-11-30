@@ -12,10 +12,10 @@ for f in listdir('.'):
         fichiers.append(f)
 
 
-tissus_dic = {"6619NG001842": "Paxgene ", "6622NG001886": "Paxgene ", "DFT-AMI-GAU-2086-008" : "lymphocyte",
+tissus_dic = {"6619NG001842": "Paxgene", "6622NG001886": "Paxgene", "DFT-AMI-GAU-2086-008" : "lymphocyte",
     "ITD-GRE-ROU-1293-002": "lymphocyte", "PED-SAL-KIC-1414-003": "lymphocyte", "DFT-SAL-REB-787-002": "fibroblaste",
     "DFT-SAL-WAT-792-001": "fibroblaste", "6622NG001445": "Paxgene", "6620NG001457": "Paxgene", "6622NG000396": "Paxgene",
-    "21NG002225": "Paxgene", "18NG001723": "Paxgene", "18NG002044": "Paxgene", "17NG002384": "Paxgene", "17NG003121": "Paxgene"}
+    "21NG002225": "Paxgene", "18NG001723": "Paxgene", "18NG002044": "Paxgene", "17NG002384": "Paxgene"}
 
 tissus = []
 
@@ -23,6 +23,7 @@ for fichier in fichiers:
     for cle, valeur in tissus_dic.items():
         if cle in fichier:
             tissus.append(valeur)
+
 
 
 print('Nbre de fichiers : {}'.format(len(fichiers)))
@@ -34,7 +35,6 @@ fibro = []
 lympho = []
 
 
-
 for i in range(len(tissus)):
 
     sp = fichiers[i].split('.')
@@ -42,7 +42,7 @@ for i in range(len(tissus)):
     
     if tissus[i] == 'Paxgene':
 
-        df = pandas.read_csv(fichiers[i],header = [0], sep='\t')
+        df = pandas.read_csv(fichiers[i], header=[0], sep='\t')
         del df['length']
         del df['%gc']
         del df['mean_coverage'] 
