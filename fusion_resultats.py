@@ -98,15 +98,73 @@ for i in range(len(tissus)):
 
 df_pax = pandas.concat(pax, axis=1)
 df_pax.drop_duplicates(subset=['chrom', 'start', 'end'], keep='first', inplace=True, ignore_index=False)
-df_pax.to_csv('synthese_paxgene.csv', sep='\t', index=False)
 
 df_fibro = pandas.concat(fibro, axis=1)
 df_fibro.drop_duplicates(subset=['chrom', 'start', 'end'], keep='first', inplace=True, ignore_index=False)
-df_fibro.to_csv('synthese_fibroblaste.csv', sep='\t', index=False)
 
 df_lympho = pandas.concat(lympho, axis=1)
 df_lympho.drop_duplicates(subset=['chrom', 'start', 'end'], keep='first', inplace=True, ignore_index=False)
-df_lympho.to_csv('synthese_lymphocyte.csv', sep='\t', index=False)
+
+
+## Ajouter les panels dans une nouvelle colonne
+
+df_pax['Panel'] = None
+df_fibro['Panel'] = None
+df_lympho['Panel'] = None
+
+
+df_dips = pandas.read_csv('/media/jbogoin/Data1/References/cibles_panels_NG/DIPS_v4_cibles_20210728.bed',header = None, sep='\t')
+df_dips['Panel'] = 'DIPS'
+del df_dips[0]
+del df_dips[1]
+del df_dips[2]
+del df_dips[4]
+del df_dips[5]
+
+
+df_ee = pandas.read_csv('/media/jbogoin/Data1/References/cibles_panels_NG/EE_v5_cibles_20220301.bed',header = None, sep='\t')
+df_ee['Panel'] = 'EE'
+del df_ee[0]
+del df_ee[1]
+del df_ee[2]
+
+
+df_spatax = pandas.read_csv('/media/jbogoin/Data1/References/cibles_panels_NG/SPATAX_CMT_v1_cibles_20210329.bed',header = None, sep='\t')
+df_spatax['Panel'] = 'SPATAX-CMT'
+del df_spatax[0]
+del df_spatax[1]
+del df_spatax[2]
+
+
+df_panel = pandas.concat([df_dips, df_ee, df_spatax])
+
+
+df_pax_f = df_pax.merge(df_panel, left_on='name', right_on=3)
+del df_pax_f['Panel_x']
+del df_pax_f[3]
+df_pax_f.rename(columns = {'Panel_y': 'Panel'}, inplace = True)
+df_pax_f.sort_values(by=['name', 'start'], inplace=True)
+
+
+df_fibro_f = df_fibro.merge(df_panel, left_on='name', right_on=3)
+del df_fibro_f['Panel_x']
+del df_fibro_f[3]
+df_fibro_f.rename(columns = {'Panel_y': 'Panel'}, inplace = True)
+df_fibro_f.sort_values(by=['name', 'start'], inplace=True)
+
+
+df_lympho_f = df_lympho.merge(df_panel, left_on='name', right_on=3)
+del df_lympho_f['Panel_x']
+del df_lympho_f[3]
+df_lympho_f.rename(columns = {'Panel_y': 'Panel'}, inplace = True)
+df_lympho_f.sort_values(by=['name', 'start'], inplace=True)
+
+
+## Fichiers finaux
+
+df_pax_f.to_csv('synthese_paxgene.csv', sep='\t', index=False)
+df_fibro_f.to_csv('synthese_fibroblaste.csv', sep='\t', index=False)
+df_lympho_f.to_csv('synthese_lymphocyte.csv', sep='\t', index=False)
 
 
 print('\nJob done!\n')
