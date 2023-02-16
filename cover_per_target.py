@@ -14,6 +14,7 @@ start_l = []
 stop_l = []
 gene_l = []
 
+
 with open(cibles, 'r') as filin:
     lignes = filin.readlines()
     for ligne in lignes:
@@ -39,22 +40,22 @@ print("\nNombre de regions cibles = {}.\n".format(len(start_l)))
         # sample = name[0]
     
 
-samfile = pysam.AlignmentFile('21NG002225-EEE.marked_duplicates.bam', 'rb')
+samfile = pysam.AlignmentFile('6620NG001457-FSP.marked_duplicates.bam', 'rb')
 
-sample = '21NG002225-EEE'
-
-
-print('Echantillon {}.'.format(sample))
+sample = '6620NG001457-FSP'
 
 
-with open(sample + '_pysam_coverage.txt', 'w') as f:
+print('Echantillon {}\n.'.format(sample))
+
+
+with open(sample + '_cover_per_target.txt', 'w') as f:
 
     f.write("Chromosome\tStart\tStop\tCouverture\tGene\n")
 
     nbre_region = 0
 
     # for region in bed
-    for i in range(len(start_l)):
+    for i in range(len(start_l)+1):
 
         nbre_region = nbre_region + 1
 
@@ -62,22 +63,22 @@ with open(sample + '_pysam_coverage.txt', 'w') as f:
         nbre_base = 0
 
         # for base in region 
-        for base in range(int(start_l[i]),int(stop_l[i])):
+        for base in range((int(start_l[i])-1),int(stop_l[i])):
 
             coverage_per_base = samfile.count_coverage(chrom_l[i],int(base),int(base+1), read_callback='all', quality_threshold=0)
             total_coverage_per_base = coverage_per_base[0][0] + coverage_per_base[1][0] + coverage_per_base[2][0] + coverage_per_base[3][0]
 
-            total_coverage = region_coverage + total_coverage_per_base
+            region_coverage = region_coverage + total_coverage_per_base
 
             nbre_base = nbre_base + 1
 
-        mean_coverage = total_coverage/nbre_base
+        mean_coverage = int(region_coverage/nbre_base)
 
         f.write(str(chrom_l[i]) + "\t" + str(start_l[i]) + "\t" + str(stop_l[i]) + "\t" + str(mean_coverage) + "\t" + str(gene_l[i]) + "\n")
         
 
         print("Region : {0}:{1}-{2}, {3}.".format(chrom_l[i],start_l[i],stop_l[i],gene_l[i]))
-        print("Taille de la region : {}.".format(int(stop_l[i])-int(start_l[i])))
+        print("Taille de la region : {}.".format(int(stop_l[i])-int(start_l[i])+1))
         print("Nombre de bases = {}.\n".format(nbre_base))
 
 
