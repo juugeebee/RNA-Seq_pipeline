@@ -3,6 +3,9 @@ import os
 import array
 
 
+print('\n#### COVER PER TARGET ###\n')
+
+
 ### Fichier CIBLES ###
 ######################
 
@@ -32,85 +35,67 @@ print("\nNombre de regions cibles = {}.\n".format(len(start_l)))
 ### Fichiers BAM ###
 ####################
 
-# files = os.listdir(".")
+files = os.listdir(".")
 
-# for filename in files:
-    # if '.dedup.bam' in filename :
-        # name = filename.split('.dedup.bam')
-        # sample = name[0]
-    
-
-samfile = pysam.AlignmentFile('6620NG001457-FSP.marked_duplicates.bam', 'rb')
-
-sample = '6620NG001457-FSP'
+for filename in files:
 
 
-print('Echantillon {}\n.'.format(sample))
-
-
-with open(sample + '_cover_per_target.txt', 'w') as f:
-
-    f.write("Chromosome\tStart\tStop\tCouverture\tGene\n")
-
-    nbre_region = 0
-
-    # for region in bed
-    for i in range(len(start_l)+1):
-
-        nbre_region = nbre_region + 1
-
-        region_coverage = 0
-        nbre_base = 0
-
-        # for base in region 
-        for base in range((int(start_l[i])-1),int(stop_l[i])):
-
-            coverage_per_base = samfile.count_coverage(chrom_l[i],int(base),int(base+1), read_callback='all', quality_threshold=0)
-            total_coverage_per_base = coverage_per_base[0][0] + coverage_per_base[1][0] + coverage_per_base[2][0] + coverage_per_base[3][0]
-
-            region_coverage = region_coverage + total_coverage_per_base
-
-            nbre_base = nbre_base + 1
-
-        mean_coverage = int(region_coverage/nbre_base)
-
-        f.write(str(chrom_l[i]) + "\t" + str(start_l[i]) + "\t" + str(stop_l[i]) + "\t" + str(mean_coverage) + "\t" + str(gene_l[i]) + "\n")
+    if ('.marked_duplicates' in filename) and ('.bai' not in filename):
         
-
-        print("Region : {0}:{1}-{2}, {3}.".format(chrom_l[i],start_l[i],stop_l[i],gene_l[i]))
-        print("Taille de la region : {}.".format(int(stop_l[i])-int(start_l[i])+1))
-        print("Nombre de bases = {}.\n".format(nbre_base))
+        name = filename.split('.marked_duplicates')
+        sample = name[0]
 
 
-    print("Nombre de regions : {}.".format(nbre_region))
+        samfile = pysam.AlignmentFile(filename, 'rb')
 
 
-print('Echantillon {}: OK.'.format(sample))
+        print('\nEchantillon : {}.'.format(sample))
 
 
+        with open(sample + '_cover_per_target.txt', 'w') as f:
 
-# # print(samfile.count_coverage('chr11',64973131,64973132))
+            f.write("Chromosome\tStart\tStop\tCouverture\tGene\n")
 
-# print(samfile.count_coverage('chr11', 64973131, 64973132, read_callback='all', quality_threshold=0))
-# print(samfile.count('chr11', 64973131, 64973132, read_callback='all'))
+            nbre_region = 0
 
-# coverage = samfile.count_coverage('chr11', 64973131, 64973132, read_callback='all', quality_threshold=0)
-# total_cover = coverage[0][0] + coverage[1][0] + coverage[2][0] + coverage[3][0]
+            # for region in bed
+            for i in range(len(start_l)):
+
+                nbre_region = nbre_region + 1
+
+                region_coverage = 0
+                nbre_base = 0
+
+                # for base in region 
+                for base in range((int(start_l[i])-1),int(stop_l[i])):
+
+                    coverage_per_base = samfile.count_coverage(chrom_l[i],int(base),int(base+1), read_callback='all', quality_threshold=0)
+                    total_coverage_per_base = coverage_per_base[0][0] + coverage_per_base[1][0] + coverage_per_base[2][0] + coverage_per_base[3][0]
+
+                    region_coverage = region_coverage + total_coverage_per_base
+
+                    nbre_base = nbre_base + 1
+
+                mean_coverage = int(region_coverage/nbre_base)
+
+                f.write(str(chrom_l[i]) + "\t" + str(start_l[i]) + "\t" + str(stop_l[i]) + "\t" + str(mean_coverage) + "\t" + str(gene_l[i]) + "\n")
+                
+
+                # print("Region : {0}:{1}-{2}, {3}.".format(chrom_l[i],start_l[i],stop_l[i],gene_l[i]))
+                # print("Taille de la region : {}.".format(int(stop_l[i])-int(start_l[i])+1))
+                # print("Nombre de bases = {}.\n".format(nbre_base))
 
 
+            print("Nombre de regions : {}.".format(nbre_region))
 
 
-# chr11:64973132
-# 244 IGV
-# 241 count_coverage
+        print('Echantillon : {} : OK.\n'.format(sample))
 
 
-
-samfile.close()
-
+        samfile.close()
 
 
-
+print('\n#### JOB DONE ! ###\n')
 
 
 

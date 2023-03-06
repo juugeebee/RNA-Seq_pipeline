@@ -1,6 +1,9 @@
 import pysam
 
 
+print('\n#### COVER PER BASE ###\n')
+
+
 ### Fichier CIBLES ###
 ######################
 
@@ -74,3 +77,6 @@ print('Echantillon {}: OK.'.format(sample))
 
 
 samfile.close()
+
+
+print('\n#### JOB DONE ! ###\n')
