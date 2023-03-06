@@ -44,7 +44,7 @@ conda activate spliceLauncher
 #Reference files
 
 mkdir -p '/media/jbogoin/Data11/References/RNA-seq/SpliceLauncher'
-cd /media/jbogoin/Data11/References/RNA-seq/SpliceLauncher
+cd /media/jbogoin/Data1/References/RNA-seq/SpliceLauncher
 wget ftp://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/annotation/GRCh37_latest/refseq_identifiers/GRCh37_latest_genomic.fna.gz
 gunzip ./GRCh37_latest_genomic.fna.gz
 wget ftp://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/annotation/GRCh37_latest/refseq_identifiers/GRCh37_latest_genomic.gff.gz
@@ -59,12 +59,13 @@ grep -f chr_names_id GRCh37_latest_genomic.gff >> GRCh37_latest_genomic.sub.gff
 
 #Configure SpliceLauncher with INSTALL mode
 
-bash ./SpliceLauncher.sh --runMode INSTALL -O ./refSpliceLauncher \
-    --fasta '/media/jbogoin/Data11/References/RNA-seq/SpliceLauncher/GRCh37_latest_genomic.fna' \
-    --gff '/media/jbogoin/Data11/References/RNA-seq/SpliceLauncher/GRCh37_latest_genomic.gff' \
-    --STAR '/home/jbogoin/STAR/STAR-2.7.0c/bin/Linux_x86_64_static/STAR' \
+bash ./SpliceLauncher.sh --runMode INSTALL \
+    -O ./refSpliceLauncher \
+    --fasta '/media/jbogoin/Data1/References/RNA-seq/SpliceLauncher/GRCh37_latest_genomic.fna' \
+    --gff '/media/jbogoin/Data1/References/RNA-seq/SpliceLauncher/GRCh37_latest_genomic.gff' \
+    --STAR '/home/jbogoin/STAR/STAR-2.7.0c/bin/Linux_x86_64/STAR' \
     --samtools '/home/jbogoin/samtools/samtools-1.16.1/samtools' \
-    --bedtools '/home/jbogoin/bedtools/bedtools2/bin/bedtools'
+    --bedtools '/home/jbogoin/bedtools/bedtools2/bin/bedtools' \
 
 
 #SpliceLauncher
