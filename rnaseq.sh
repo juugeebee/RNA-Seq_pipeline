@@ -13,14 +13,19 @@ ref='/media/jbogoin/Data1/References/fa_hg19/rna-seq/GRCh37.primary_assembly.gen
 gtf_file='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.annotation.gtf'
 refflat='/media/jbogoin/Data1/References/RNA-seq/refFlat_hg19.txt'
 
+
 gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.genes.gtf'
 # Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
 
-ng_target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.bed'
-ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.interval_list'
+# ng_target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.bed'
+# ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.interval_list'
 
 
-## TRIMMING DES ADATATEURS
+ng_target='/media/jbogoin/Data2/Donnees_brutes/hg19/NG_TRS/bed/CEREBMDv1_hg19_13Mar2019_primary_targets.bed'
+ng_target_il='/media/jbogoin/Data2/Donnees_brutes/hg19/NG_TRS/bed/CEREBMDv1_hg19_13Mar2019_primary_targets.interval_list'
+
+
+# TRIMMING DES ADATATEURS
 
 cd Fastq_cat
 echo "TRIMMER"
