@@ -4,14 +4,14 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate rnaseq
 
 echo ""
-echo "rnaseq_with_umi.sh start"
+echo "rnaseq_cibles_with_umi.sh start"
 echo ""
 
 
-genome_dir='/media/jbogoin/Data1/References/RNA-seq/STAR'
+genome_dir='/media/jbogoin/Data1/References/hg19/RNA-seq/STAR'
 ref='/media/jbogoin/Data1/References/fa_hg19/rna-seq/GRCh37.primary_assembly.genome.fa'
 gtf_file='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.annotation.gtf'
-refflat='/media/jbogoin/Data1/References/RNA-seq/refFlat_hg19.txt'
+refflat='/media/jbogoin/Data1/References/RNA-seq/hg19/refFlat_hg19.txt'
 
 gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.genes.gtf'
 # Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
@@ -190,9 +190,6 @@ mkdir -p RNA-SeQC
 mv *RNA-SeQC RNA-SeQC/
 
 
-conda deactivate
-
-
 echo ""
-echo "rnaseq_with_umi.sh job done!"
+echo "rnaseq_cibles_with_umi.sh job done!"
 echo ""
