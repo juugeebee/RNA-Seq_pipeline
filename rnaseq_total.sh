@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/sudo bash
 
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate rnaseq
@@ -21,38 +21,44 @@ glob='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/globines.bed'
 glob_il='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/goblines.interval_list'
 
 
-## ALIGNEMENT
-## STAR (Spliced Transcripts Alignment to a Reference)
+# ALIGNEMENT
+# STAR (Spliced Transcripts Alignment to a Reference)
 
-echo "ALIGNEMENT"
-echo ""
+#echo "ALIGNEMENT"
+#echo ""
 
 ## GENERATING GENOME INDEXES
 #STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 
 ## RUNNING MAPPING JOB
-cd Fastq
+#cd Fastq
 
-for R1 in *_R1_001.fastq.gz; 
-do R2=${R1/_R1/_R2}; 
-   SAMPLE=${R1%%_*}; 
-   FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
-   DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
-   BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
-   STAR --runThreadN 16 --genomeDir $genome_dir \
-       --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
-       --readFilesCommand zcat --readFilesIn $R1 $R2 \
-       --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
-       --outFileNamePrefix ${SAMPLE} \
-      --quantMode TranscriptomeSAM GeneCounts \
-       --twopassMode Basic; 
-done
+#for R1 in *_R1_001.fastq.gz; 
+#do R2=${R1/_R1/_R2}; 
+#    SAMPLE=${R1%%_*}; 
+#    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
+#    DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
+#    BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
+#    STAR --runThreadN 16 --genomeDir $genome_dir \
+#         --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
+#         --readFilesCommand zcat --readFilesIn $R1 $R2 \
+#         --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
+#         --outFileNamePrefix ${SAMPLE} \
+#  	 --quantMode TranscriptomeSAM GeneCounts \
+#        --twopassMode Basic; 
+#done
 
 
-mkdir -p ../BAM
-mv !(*.gz) ../BAM
-cd ../BAM
+#mkdir -p ../BAM
+#mv !(*.gz) ../BAM
+#mv `ls . | grep -v "\.gz$"` ../BAM
+#cd ../BAM
+
+
+## CREATION DES INDEXS
+
+#for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
 
 
 ## QC
@@ -61,14 +67,14 @@ echo "QC"
 echo ""
 
 
-#conda activate rnaseq
+conda activate rnaseq
 
 echo "RNASEQC"
 echo ""
 
 for i in *Aligned.sortedByCoord.out.bam; 
    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
-   rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded=rf; 
+   rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded='rf'; 
 done
 
 
