@@ -24,41 +24,41 @@ glob_il='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/goblines.interval_l
 # ALIGNEMENT
 # STAR (Spliced Transcripts Alignment to a Reference)
 
-#echo "ALIGNEMENT"
-#echo ""
+echo "ALIGNEMENT"
+echo ""
 
-## GENERATING GENOME INDEXES
-#STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
-
-
-## RUNNING MAPPING JOB
-#cd Fastq
-
-#for R1 in *_R1_001.fastq.gz; 
-#do R2=${R1/_R1/_R2}; 
-#    SAMPLE=${R1%%_*}; 
-#    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
-#    DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
-#    BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
-#    STAR --runThreadN 16 --genomeDir $genome_dir \
-#         --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
-#         --readFilesCommand zcat --readFilesIn $R1 $R2 \
-#         --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
-#         --outFileNamePrefix ${SAMPLE} \
-#  	 --quantMode TranscriptomeSAM GeneCounts \
-#        --twopassMode Basic; 
-#done
+# GENERATING GENOME INDEXES
+STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 
-#mkdir -p ../BAM
-#mv !(*.gz) ../BAM
-#mv `ls . | grep -v "\.gz$"` ../BAM
-#cd ../BAM
+# RUNNING MAPPING JOB
+cd Fastq
+
+for R1 in *_R1_001.fastq.gz; 
+do R2=${R1/_R1/_R2}; 
+   SAMPLE=${R1%%_*}; 
+   FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
+   DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
+   BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
+   STAR --runThreadN 16 --genomeDir $genome_dir \
+        --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
+        --readFilesCommand zcat --readFilesIn $R1 $R2 \
+        --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
+        --outFileNamePrefix ${SAMPLE} \
+ 	 --quantMode TranscriptomeSAM GeneCounts \
+       --twopassMode Basic; 
+done
 
 
-## CREATION DES INDEXS
+mkdir -p ../BAM
+mv !(*.gz) ../BAM
+mv `ls . | grep -v "\.gz$"` ../BAM
+cd ../BAM
 
-#for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
+
+# CREATION DES INDEXS
+
+for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
 
 
 ## QC

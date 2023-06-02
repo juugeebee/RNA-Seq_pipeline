@@ -31,7 +31,7 @@ print(len(nb_list))
 
 with open("uniquely_mapped_reads.txt", "w") as fichier:
     
-    fichier.write("ID\tUniquely mapped reads number\n")
+    fichier.write("ID\tUniquely mapped reads number\r\n")
     
     for i in range(len(id_list)) :
 
