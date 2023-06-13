@@ -8,7 +8,7 @@ echo "rnaseq_cibles.sh start"
 echo ""
 
 
-genome_dir='/media/jbogoin/Data1/References/hg19/RNA-seq/STAR'
+genome_dir='/media/jbogoin/Data1/References/RNA-seq/hg19/STAR'
 ref='/media/jbogoin/Data1/References/fa_hg19/rna-seq/GRCh37.primary_assembly.genome.fa'
 gtf_file='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.annotation.gtf'
 refflat='/media/jbogoin/Data1/References/RNA-seq/hg19/refFlat_hg19.txt'
@@ -17,41 +17,41 @@ refflat='/media/jbogoin/Data1/References/RNA-seq/hg19/refFlat_hg19.txt'
 gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.genes.gtf'
 # Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
 
-# ng_target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.bed'
-# ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.interval_list'
 
-
-ng_target='/media/jbogoin/Data2/Donnees_brutes/hg19/NG_TRS/bed/CEREBMDv1_hg19_13Mar2019_primary_targets.bed'
-ng_target_il='/media/jbogoin/Data2/Donnees_brutes/hg19/NG_TRS/bed/CEREBMDv1_hg19_13Mar2019_primary_targets.interval_list'
+ng_target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.bed'
+ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.interval_list'
 
 
 # TRIMMING DES ADATATEURS
 
-cd Fastq_cat
-echo "TRIMMER"
-echo ""
-bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
-cd ..
+# cd Fastq_cat
+# echo "TRIMMER"
+# echo ""
+# bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
+# cd ..
 
 
-## ALIGNEMENT
-## STAR (Spliced Transcripts Alignment to a Reference)
+# conda activate rnaseq
 
 
-echo "ALIGNEMENT"
-echo ""
+# ## ALIGNEMENT
+# ## STAR (Spliced Transcripts Alignment to a Reference)
 
 
-## GENERATING GENOME INDEXES
-STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
- --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
+# echo "ALIGNEMENT"
+# echo ""
 
 
-## RUNNING MAPPING JOB
-cd Fastq_trimmed
+# ## GENERATING GENOME INDEXES
+# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
+#  --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
-for R1 in *_R1.fastq.gz; 
-    do R2=${R1/_R1./_R2.}; 
+
+# ## RUNNING MAPPING JOB
+# cd Fastq_trimmed
+
+for R1 in *_R1_001.fastq.gz; 
+    do R2=${R1/_R1_/_R2_}; 
     SAMPLE=${R1%%_*}; 
     FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
     DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
@@ -67,48 +67,15 @@ done
 
 conda deactivate
 
-mkdir -p ../BAM_STAR_sans_UMI
-mv !(*.gz) ../BAM_STAR_sans_UMI
-cd ../BAM_STAR_sans_UMI
-mv *.properties ../Fastq_trimmed
-
-
-## MarkDuplicates sans traitement des UMI
-
-echo "MarkDuplicates"
-echo ""
-
-conda activate gatk4
-
-for i in *Aligned.sortedByCoord.out.bam;
-    do sample=${i%Aligned.sortedByCoord.out.bam};
-    gatk MarkDuplicates \
-        -I $i \
-        -O ${sample}.marked_duplicates.bam \
-        -M ${sample}.marked_dup_metrics.txt;
-done
-
-conda deactivate
-
 
 ## CREATION DES INDEXS
 
-for i in *.marked_duplicates.bam; do samtools index -@ 16 $i; done
+for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
 
 
 ## QC
-echo "RNASEQC"
-echo ""
-
-conda activate rnaseq
-
-for i in *.marked_duplicates.bam; 
-    do sample=${i%.marked_duplicates.bam}; 
-    rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded=rf; 
-done
 
 
-conda deactivate
 conda activate gatk4
 
 
@@ -117,8 +84,8 @@ echo ""
 
 
 # Couverture totale a chaque position du bed
-for i in *.marked_duplicates.bam; 
-    do sample=${i%.marked_duplicates.bam}; 
+for i in *Aligned.sortedByCoord.out.bam; 
+    do sample=${i%Aligned.sortedByCoord.out.bam}; 
     gatk CollectHsMetrics \
     -I $i \
     -O ${sample}.hsMetrics.txt \
@@ -129,29 +96,32 @@ for i in *.marked_duplicates.bam;
 done
 
 
-mkdir ../QC_sans_UMI
-mv *_RNA-SeQC ../QC_sans_UMI
-mv *.hsMetrics.txt ../QC_sans_UMI
-mv *_pertargetcoverage.txt ../QC_sans_UMI
-cd ../QC_sans_UMI
+mkdir ../QC_hg19
+mv *.hsMetrics.txt ../QC_hg19
+mv *_pertargetcoverage.txt ../QC_hg19
+cd ../QC_hg19
 
 
 conda deactivate
-conda activate rnaseq
+# conda activate rnaseq
 
-echo "MULTIQC"
+# echo "MULTIQC"
 
-multiqc -f .
+# multiqc -f .
 
-conda deactivate
+# conda deactivate
 
 
 mkdir -p hsMetrics
 mv *.hsMetrics.txt hsMetrics/
 mkdir -p pertargetcoverage
 mv *_pertargetcoverage.txt pertargetcoverage/
-mkdir -p RNA-SeQC
-mv *RNA-SeQC RNA-SeQC/
+# mkdir -p RNA-SeQC
+# mv *RNA-SeQC RNA-SeQC/
+
+
+mkdir -p ../BAM_hg19
+mv `ls . | grep -v "\.gz$"` ../BAM_hg19
 
 
 echo ""
