@@ -67,20 +67,20 @@ echo "QC"
 echo ""
 
 
-#conda activate rnaseq
+conda activate rnaseq
 
 
-#***********************************************************************#
-# echo "RNASEQC"
-# echo ""
+***********************************************************************#
+echo "RNASEQC"
+echo ""
 
-# for i in *Aligned.sortedByCoord.out.bam; 
-#    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
-#    rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded='rf'; 
-# done
+for i in *Aligned.sortedByCoord.out.bam; 
+   do sample=${i/Aligned.sortedByCoord.out.bam/}; 
+   rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded='rf'; 
+done
 
 
-# conda deactivate
+conda deactivate
 
 conda activate gatk4
 
@@ -198,6 +198,9 @@ conda activate salmon
 #-i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx'
 
 
+mkdir -p ../QC
+
+
 # COUNT
 for R1 in *_R1_001.fastq.gz; 
    do R2=${R1/_R1/_R2};
@@ -242,7 +245,6 @@ done
 ### CLEANING
 
 
-mkdir -p ../QC
 # mv *_RNA-SeQC ../QC
 mv *.RNAseqMetrics.txt ../QC
 # mv *.hsMetrics.txt ../QC

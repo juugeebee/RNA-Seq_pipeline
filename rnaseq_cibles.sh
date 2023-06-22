@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate rnaseq
+
 
 echo ""
 echo "rnaseq_cibles.sh start"
@@ -24,22 +24,26 @@ ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1
 
 # TRIMMING DES ADATATEURS
 
-# cd Fastq_cat
+conda activate rnaseq
+
 # echo "TRIMMER"
 # echo ""
+
+# cd Fastq
+
 # bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
 # cd ..
 
 
-# conda activate rnaseq
+conda activate rnaseq
 
 
-# ## ALIGNEMENT
-# ## STAR (Spliced Transcripts Alignment to a Reference)
+## ALIGNEMENT
+## STAR (Spliced Transcripts Alignment to a Reference)
 
 
-# echo "ALIGNEMENT"
-# echo ""
+echo "ALIGNEMENT"
+echo ""
 
 
 # ## GENERATING GENOME INDEXES
@@ -48,10 +52,10 @@ ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1
 
 
 # ## RUNNING MAPPING JOB
-# cd Fastq_trimmed
+cd Fastq_trimmed
 
-for R1 in *_R1_001.fastq.gz; 
-    do R2=${R1/_R1_/_R2_}; 
+for R1 in *_R1.fastq.gz; 
+    do R2=${R1/_R1./_R2.}; 
     SAMPLE=${R1%%_*}; 
     FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
     DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
@@ -69,13 +73,10 @@ conda deactivate
 
 
 ## CREATION DES INDEXS
-
 for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
 
 
 ## QC
-
-
 conda activate gatk4
 
 
@@ -92,36 +93,39 @@ for i in *Aligned.sortedByCoord.out.bam;
     -R $ref \
     --BAIT_INTERVALS $ng_target_il \
     --TARGET_INTERVALS $ng_target_il \
-    --PER_TARGET_COVERAGE ${sample}.hsMetrics_pertargetcoverage.txt;
+    --PER_TARGET_COVERAGE ${sample}.pertargetcoverage.txt;
 done
 
 
-mkdir ../QC_hg19
-mv *.hsMetrics.txt ../QC_hg19
-mv *_pertargetcoverage.txt ../QC_hg19
-cd ../QC_hg19
+mkdir ../QC
+mv *.hsMetrics.txt ../QC
+mv *_pertargetcoverage.txt ../QC
+
+cd ../QC
 
 
 conda deactivate
-# conda activate rnaseq
 
-# echo "MULTIQC"
 
-# multiqc -f .
+conda activate rnaseq
 
-# conda deactivate
+echo "MULTIQC"
+
+multiqc -f .
+
+conda deactivate
 
 
 mkdir -p hsMetrics
-mv *.hsMetrics.txt hsMetrics/
+mv *hsMetrics.txt hsMetrics/
 mkdir -p pertargetcoverage
-mv *_pertargetcoverage.txt pertargetcoverage/
-# mkdir -p RNA-SeQC
-# mv *RNA-SeQC RNA-SeQC/
+mv *pertargetcoverage.txt pertargetcoverage/
+mkdir -p RNA-SeQC
+mv *RNA-SeQC RNA-SeQC/
 
 
-mkdir -p ../BAM_hg19
-mv `ls . | grep -v "\.gz$"` ../BAM_hg19
+mkdir -p ../BAM
+mv `ls . | grep -v "\.gz$"` ../BAM
 
 
 echo ""
