@@ -9,7 +9,8 @@ print('\n#### COVER PER TARGET ###\n')
 ### Fichier CIBLES ###
 ######################
 
-cibles = '/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.bed'
+# cibles = '/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions.bed'
+cibles = '/media/jbogoin/Data1/References/cibles_panels_NG/mosaiques_SCN1A_hg19.bed'
 
 
 chrom_l = []
@@ -40,9 +41,9 @@ files = os.listdir(".")
 for filename in files:
 
 
-    if ('.marked_duplicates' in filename) and ('.bai' not in filename):
+    if ('.dedup' in filename) and ('.bai' not in filename):
         
-        name = filename.split('.marked_duplicates')
+        name = filename.split('.dedup')
         sample = name[0]
 
 
