@@ -26,16 +26,13 @@ ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1
 
 conda activate rnaseq
 
-# echo "TRIMMER"
-# echo ""
+echo "TRIMMER"
+echo ""
 
-# cd Fastq
+cd Fastq
 
-# bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
-# cd ..
-
-
-conda activate rnaseq
+bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
+cd ..
 
 
 ## ALIGNEMENT
@@ -60,7 +57,7 @@ for R1 in *_R1.fastq.gz;
     FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
     DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
     BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
-    STAR --runThreadN 16 --genomeDir $genome_dir \
+    STAR --runThreadN 12 --genomeDir $genome_dir \
         --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
         --readFilesCommand zcat --readFilesIn $R1 $R2 \
         --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
@@ -69,11 +66,12 @@ for R1 in *_R1.fastq.gz;
         --twopassMode Basic; 
 done
 
-conda deactivate
-
 
 ## CREATION DES INDEXS
 for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
+
+
+conda deactivate
 
 
 ## QC

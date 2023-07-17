@@ -1,7 +1,6 @@
 #!/usr/bin/sudo bash
 
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate rnaseq
 
 echo ""
 echo "rnaseq_total.sh start"
@@ -20,11 +19,11 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
-glob='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/globines.bed'
-glob_il='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/goblines.interval_list'
+# glob='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/globines.bed'
+# glob_il='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/goblines.interval_list'
 
-ng='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
-ng_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
+# ng='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
+# ng_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
 
 
 # ALIGNEMENT
@@ -33,35 +32,53 @@ ng_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Region
 echo "ALIGNEMENT"
 echo ""
 
+
+#***********************************************************************#
 # GENERATING GENOME INDEXES
+# conda activate rnaseq
 # STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
+# conda deactivate
 
 
-# RUNNING MAPPING JOB
 cd Fastq
 
+
+#***********************************************************************#
+echo "FastQC"
+echo ""
+
+conda activate fastqc
+
+mkdir -p ../QC/fastqc
+for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+
+conda deactivate
+
+
+#***********************************************************************#
+# RUNNING MAPPING JOB
 for R1 in *_R1_001.fastq.gz; 
 do R2=${R1/_R1/_R2}; 
    SAMPLE=${R1%%_*}; 
    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
    DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
    BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
-   STAR --runThreadN 16 --genomeDir $genome_dir \
-        --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
-        --readFilesCommand zcat --readFilesIn $R1 $R2 \
-        --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
-        --outFileNamePrefix ${SAMPLE} \
- 	 --quantMode TranscriptomeSAM GeneCounts \
-       --twopassMode Basic; 
+   STAR --runThreadN 12 --genomeDir $genome_dir -n 10000 \
+      --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
+      --readFilesCommand zcat --readFilesIn $R1 $R2 \
+      --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
+      --outFileNamePrefix ${SAMPLE} \
+ 	   --quantMode TranscriptomeSAM GeneCounts \
+      --twopassMode Basic; 
 done
 
 
+#***********************************************************************#
 # CREATION DES INDEXS
-
 for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
 
 
-## QC
+############# QC #############
 
 echo "QC"
 echo ""
@@ -70,7 +87,7 @@ echo ""
 conda activate rnaseq
 
 
-***********************************************************************#
+#***********************************************************************#
 echo "RNASEQC"
 echo ""
 
@@ -118,6 +135,34 @@ done
 
 
 #***********************************************************************#
+echo "salmon"
+echo ""
+
+conda activate salmon
+
+
+# INDEX
+#salmon index -t '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts.fa' \
+#-i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx'
+
+
+# COUNT
+for R1 in *_R1_001.fastq.gz; 
+   do R2=${R1/_R1/_R2};
+   sample=${R1/_S**_R1_001.fastq.gz/};
+   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx' \
+   -l ISR \
+   -1 $R1 -2 $R2 \
+   --validateMappings \
+   -p 24 \
+   -o ../QC/salmon/$sample;
+done
+
+
+conda deactivate 
+
+
+#***********************************************************************#
 # echo "FeatureCounts"
 # echo ""
 
@@ -139,9 +184,6 @@ done
 # echo "htseq-count"
 # echo ""
 
-
-# mkdir -p ../QC
-# mkdir -p ../QC/htseq
 
 # conda activate htseq
 
@@ -184,34 +226,6 @@ done
 # done
  
 # conda deactivate
-
-
-#***********************************************************************#
-echo "salmon"
-echo ""
-
-conda activate salmon
-
-
-# INDEX
-#salmon index -t '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts.fa' \
-#-i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx'
-
-
-mkdir -p ../QC
-
-
-# COUNT
-for R1 in *_R1_001.fastq.gz; 
-   do R2=${R1/_R1/_R2};
-   sample=${R1/_S**_R1_001.fastq.gz/};
-   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx' \
-   -l ISR \
-   -1 $R1 -2 $R2 \
-   --validateMappings \
-   -p 24 \
-   -o ../QC/salmon/$sample;
-done
 
 
 #***********************************************************************#
