@@ -259,7 +259,7 @@ conda deactivate
 ### CLEANING
 
 
-# mv *_RNA-SeQC ../QC
+mv *_RNA-SeQC ../QC
 mv *.RNAseqMetrics.txt ../QC
 # mv *.hsMetrics.txt ../QC
 # mv *_pertargetcoverage.txt ../QC
@@ -286,8 +286,8 @@ conda deactivate
 # mv *.hsMetrics.txt hsMetrics
 # mkdir -p pertargetcoverage
 # mv *_pertargetcoverage.txt pertargetcoverage
-# mkdir -p RNA-SeQC
-# mv *RNA-SeQC RNA-SeQC
+mkdir -p RNA-SeQC
+mv *RNA-SeQC RNA-SeQC
 mkdir -p RnaSeqMetrics
 mv *.RNAseqMetrics.txt RnaSeqMetrics
 # mkdir -p FeatureCounts
