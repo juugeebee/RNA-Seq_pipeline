@@ -44,7 +44,7 @@ echo ""
 
 
 # ## GENERATING GENOME INDEXES
-# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
+# STAR --runThreadN 12 --runMode genomeGenerate --genomeDir $genome_dir\
 #  --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 

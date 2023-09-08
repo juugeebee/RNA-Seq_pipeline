@@ -26,26 +26,22 @@ gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary
 # ng_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
 
 
-# ALIGNEMENT
-# STAR (Spliced Transcripts Alignment to a Reference)
-
-echo "ALIGNEMENT"
-echo ""
 
 
-#***********************************************************************#
-# GENERATING GENOME INDEXES
-# conda activate rnaseq
-# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
-# conda deactivate
 
 
-cd Fastq
+
+
+
+
 
 
 #***********************************************************************#
 echo "FastQC"
 echo ""
+
+
+cd Fastq
 
 conda activate fastqc
 
@@ -55,8 +51,24 @@ for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fast
 conda deactivate
 
 
+# ALIGNEMENT
+# STAR (Spliced Transcripts Alignment to a Reference)
+
+echo ""
+echo "ALIGNEMENT"
+echo ""
+
+
+conda activate rnaseq
+
+
 #***********************************************************************#
-# RUNNING MAPPING JOB
+# GENERATING GENOME INDEXES
+# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
+
+
+#***********************************************************************#
+RUNNING MAPPING JOB
 for R1 in *_R1_001.fastq.gz; 
 do R2=${R1/_R1/_R2}; 
    SAMPLE=${R1%%_*}; 
@@ -67,9 +79,7 @@ do R2=${R1/_R1/_R2};
       --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
       --readFilesCommand zcat --readFilesIn $R1 $R2 \
       --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
-      --outFileNamePrefix ${SAMPLE} \
- 	   --quantMode TranscriptomeSAM GeneCounts \
-      --twopassMode Basic; 
+      --outFileNamePrefix ${SAMPLE} --quantMode TranscriptomeSAM GeneCounts --twopassMode Basic; 
 done
 
 
@@ -82,9 +92,6 @@ for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
 
 echo "QC"
 echo ""
-
-
-conda activate rnaseq
 
 
 #***********************************************************************#
@@ -113,6 +120,8 @@ for i in *Aligned.sortedByCoord.out.bam;
    -R $ref -STRAND SECOND_READ_TRANSCRIPTION_STRAND \
    --RIBOSOMAL_INTERVALS /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.rRNA.transcripts.interval_list; 
 done
+
+conda deactivate
 
 
 #***********************************************************************#
