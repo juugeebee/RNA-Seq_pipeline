@@ -1,11 +1,17 @@
+import os
+
+
+repertoire = os.getcwd()
+
+
 fichier = open("config.yaml", "w")
 
 fichier.write("projectTitle: Detection of RNA Outlier Pipeline\n")
-fichier.write("root: ./output\n")
-fichier.write("htmlOutputPath: ./output/html\n")
+fichier.write("root: " + repertoire + "/output\n")
+fichier.write("htmlOutputPath: " + repertoire + "/output/html\n")
 fichier.write("indexWithFolderName: true\n")
 
-fichier.write("hpoFile: null\n")
+fichier.write("hpoFile: /media/jbogoin/Data1/Annotations/HPO/genes_to_disease.txt\n")
 fichier.write("sampleAnnotation: sample_annotation.tsv\n")
 
 fichier.write("geneAnnotation:\n")
@@ -28,10 +34,9 @@ fichier.write("\n")
 ###############
 
 fichier.write("aberrantExpression:\n")
-fichier.write("    run: true\n")
+fichier.write("    run: false\n")
 fichier.write("    groups:\n")
 fichier.write("        - group1\n")
-# fichier.write("        - group2\n")
 fichier.write("    fpkmCutoff: 1\n")
 fichier.write("    implementation: autoencoder\n")
 fichier.write("    padjCutoff: 0.05\n")
