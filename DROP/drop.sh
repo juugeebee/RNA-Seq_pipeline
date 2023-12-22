@@ -21,18 +21,21 @@ conda activate drop_env
 
 
 if [ -d "output" ];then
+    echo ''
     echo "Le dossier output existe !";
+    echo ''
     rm -Rf output;
     snakemake aberrantSplicing --unlock
 else :
+    echo ''
     echo "Le dossier output n'existe pas !";
+    echo ''
     drop init;
     drop update
 fi
 
 
-snakemake aberrantSplicing --cores 16 --latency-wait 10
-
+snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100
 
 conda deactivate
 

@@ -2,16 +2,9 @@ import pandas
 from os import listdir
 import os
 
-
-run_l = os.getcwd()
-run = run_l.split('/')
-runid = run[-1]
-
-
-r1 = run_l.rstrip(run_l[-1])
-r2 = r1.rstrip(r1[-1])
-r3 = r2.rstrip(r2[-1])
-repertoire = r3.rstrip(r3[-1])
+chemin = os.getcwd()
+chemin_l = chemin.split('/')
+runid = chemin_l[-1]
 
 
 rnaid = []
@@ -20,8 +13,8 @@ rna_bam_file = []
 
 for f in listdir("../BAM") :
     if ('Aligned.sortedByCoord.out.bam' in f) and ('bai' not in f) :
-        rna_bam_file.append(repertoire + 'BAM/' + f)
-        id_l = f.split('A')
+        rna_bam_file.append(chemin + '../BAM/' + f)
+        id_l = f.split('Aligned.sortedByCoord')
         sample = id_l[0]
         rnaid.append(sample)
 
@@ -94,7 +87,8 @@ rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_hg38/PAXgene/6623CY000537Alig
 
 df['RNA_ID'] = rnaid
 df['RNA_BAM_FILE'] = rna_bam_file
-df['DROP_GROUP'] = 'outrider,outrider_external,fraser,fraser_external,batch_0,group1,PAXgen'
+#df['DROP_GROUP'] = 'fraser,fraser_external,batch_0,group1,PAXgene'
+df['DROP_GROUP'] = 'fraser,batch_0,group1,PAXgene'
 df['PAIRED_END'] = 'TRUE'
 df['STRAND'] = 'REVERSE'
 df['COUNT_MODE'] = 'Union'
@@ -105,3 +99,6 @@ df['DNA_ID'] = rnaid
 
 
 df.to_csv('sample_annotation.tsv', sep='\t', index=False)
+
+
+print('\n#####\nFichier sample_annotation.tsv genere !\n')
