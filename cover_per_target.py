@@ -13,6 +13,7 @@ print('\n#### COVER PER TARGET ###\n')
 cibles = '/media/jbogoin/Data1/References/cibles_panels_NG/mosaiques_SCN1A_hg19.bed'
 
 
+
 chrom_l = []
 start_l = []
 stop_l = []
