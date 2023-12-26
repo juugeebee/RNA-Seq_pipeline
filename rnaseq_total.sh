@@ -19,24 +19,8 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
-# glob='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/globines.bed'
-# glob_il='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/goblines.interval_list'
 
-# ng='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
-# ng_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
-
-
-
-
-
-
-
-
-
-
-
-
-#***********************************************************************#
+***********************************************************************#
 echo "FastQC"
 echo ""
 
@@ -62,13 +46,13 @@ echo ""
 conda activate rnaseq
 
 
-#***********************************************************************#
-# GENERATING GENOME INDEXES
-# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
+# #***********************************************************************#
+# # GENERATING GENOME INDEXES
+# # STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 
 #***********************************************************************#
-RUNNING MAPPING JOB
+#RUNNING MAPPING JOB
 for R1 in *_R1_001.fastq.gz; 
 do R2=${R1/_R1/_R2}; 
    SAMPLE=${R1%%_*}; 
@@ -124,26 +108,9 @@ done
 conda deactivate
 
 
-#***********************************************************************#
-# echo "pertargetcoverage"
-# echo ""
-
-# # Couverture totale a chaque position du bed
-# for i in *Aligned.sortedByCoord.out.bam; 
-#     do sample=${i/Aligned.sortedByCoord.out.bam/}; 
-#     gatk CollectHsMetrics \
-#     -I $i \
-#     -O ${sample}.hsMetrics.txt \
-#     -R $ref \
-#     --BAIT_INTERVALS $ng_il \
-#     --TARGET_INTERVALS $ng_il \
-#     --PER_TARGET_COVERAGE ${sample}.hsMetrics_pertargetcoverage.txt;
-# done
-
-# conda deactivate
 
 
-#***********************************************************************#
+***********************************************************************#
 echo "salmon"
 echo ""
 
@@ -171,98 +138,98 @@ done
 conda deactivate 
 
 
-#***********************************************************************#
-# echo "FeatureCounts"
-# echo ""
+# #***********************************************************************#
+# # echo "FeatureCounts"
+# # echo ""
 
-# conda activate FeatureCounts
+# # conda activate FeatureCounts
 
-# for i in *Aligned.sortedByCoord.out.bam;
-#    do sample=${i/Aligned.sortedByCoord.out.bam/};
-#    featureCounts -p -O -T 24 -s 2 \
-#    -t transcript \
-#    -a $gtf_transcript \
-#    -o ${sample}_featureCounts_output.txt \
-#    $i;
-# done
+# # for i in *Aligned.sortedByCoord.out.bam;
+# #    do sample=${i/Aligned.sortedByCoord.out.bam/};
+# #    featureCounts -p -O -T 24 -s 2 \
+# #    -t transcript \
+# #    -a $gtf_transcript \
+# #    -o ${sample}_featureCounts_output.txt \
+# #    $i;
+# # done
 
-# conda deactivate 
-
-
-#***********************************************************************#
-# echo "htseq-count"
-# echo ""
+# # conda deactivate 
 
 
-# conda activate htseq
-
-# for i in *Aligned.sortedByCoord.out.bam;
-#    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
-#    htseq-count -f bam -s reverse -t transcript \
-#    --secondary-alignments ignore --supplementary-alignments ignore \
-#    -c ../QC/htseq/${sample}_htseq_output.tsv \
-#    -p bam \
-#    -n 24 \
-#    $i \
-#    $gtf_transcript;
-# done
-
-# conda deactivate
+# #***********************************************************************#
+# # echo "htseq-count"
+# # echo ""
 
 
-#***********************************************************************#
-# echo "rsem"
-# echo ""
+# # conda activate htseq
 
-# conda activate rsem
+# # for i in *Aligned.sortedByCoord.out.bam;
+# #    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
+# #    htseq-count -f bam -s reverse -t transcript \
+# #    --secondary-alignments ignore --supplementary-alignments ignore \
+# #    -c ../QC/htseq/${sample}_htseq_output.tsv \
+# #    -p bam \
+# #    -n 24 \
+# #    $i \
+# #    $gtf_transcript;
+# # done
+
+# # conda deactivate
 
 
-# # INDEX
-# #mkdir -p /media/jbogoin/Data1/References/RNA-seq/hg38/ref/human_gencode
+# #***********************************************************************#
+# # echo "rsem"
+# # echo ""
 
-# #rsem-prepare-reference --gtf '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.annotation.gtf' \
-# #--star --star-path '/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v43.primary_assembly.genome.fa' \
-# #/media/jbogoin/Data1/References/RNA-seq/hg38/ref/human_gencode
+# # conda activate rsem
 
 
-# # COUNT
-# for R1 in *_R1_001.fastq.gz; 
-#    do R2=${R1/_R1/_R2};
-#    sample=${R1/_S**_R1_001.fastq.gz/};
-#    rsem-calculate-expression \
-#    --paired-end -p 24 --append-names --star --star-gzipped-read-file --no-bam-output\
-#    $R1 $R2 /media/jbogoin/Data1/References/RNA-seq/hg38/ref/human_gencode $sample;
-# done
+# # # INDEX
+# # #mkdir -p /media/jbogoin/Data1/References/RNA-seq/hg38/ref/human_gencode
+
+# # #rsem-prepare-reference --gtf '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.annotation.gtf' \
+# # #--star --star-path '/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v43.primary_assembly.genome.fa' \
+# # #/media/jbogoin/Data1/References/RNA-seq/hg38/ref/human_gencode
+
+
+# # # COUNT
+# # for R1 in *_R1_001.fastq.gz; 
+# #    do R2=${R1/_R1/_R2};
+# #    sample=${R1/_S**_R1_001.fastq.gz/};
+# #    rsem-calculate-expression \
+# #    --paired-end -p 24 --append-names --star --star-gzipped-read-file --no-bam-output\
+# #    $R1 $R2 /media/jbogoin/Data1/References/RNA-seq/hg38/ref/human_gencode $sample;
+# # done
  
-# conda deactivate
+# # conda deactivate
 
 
-#***********************************************************************#
-# echo "kallisto"
-# echo ""
+# #***********************************************************************#
+# # echo "kallisto"
+# # echo ""
 
-# conda activate kallisto
-
-
-# # INDEX
-# #kallisto index '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts.fa' \
-# #-i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-kallisto.idx'
+# # conda activate kallisto
 
 
-# # COUNT
-# for R1 in *_R1_001.fastq.gz; 
-#    do R2=${R1/_R1/_R2};
-#    sample=${R1/_S**_R1_001.fastq.gz/};
-#    kallisto quant\
-#    -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-kallisto.idx'\
-#    -o ../QC/kallisto/$sample \
-#    --rf \
-#    -t 24 \
-#    --genomebam --gtf $gtf_transcript \
-#    $R1 $R2 ;
-# done
+# # # INDEX
+# # #kallisto index '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts.fa' \
+# # #-i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-kallisto.idx'
 
-# conda deactivate
+
+# # # COUNT
+# # for R1 in *_R1_001.fastq.gz; 
+# #    do R2=${R1/_R1/_R2};
+# #    sample=${R1/_S**_R1_001.fastq.gz/};
+# #    kallisto quant\
+# #    -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-kallisto.idx'\
+# #    -o ../QC/kallisto/$sample \
+# #    --rf \
+# #    -t 24 \
+# #    --genomebam --gtf $gtf_transcript \
+# #    $R1 $R2 ;
+# # done
+
+# # conda deactivate
 
 
 ### CLEANING
@@ -309,6 +276,14 @@ mv *.RNAseqMetrics.txt RnaSeqMetrics
 mkdir -p ../BAM
 # mv !(*.gz) ../BAM
 mv `ls . | grep -v "\.gz$"` ../BAM
+
+
+#***********************************************************************#
+echo "fraser"
+echo ""
+
+bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
+
 
 
 echo ""
