@@ -36,28 +36,28 @@ echo ""
 conda activate rnaseq
 
 
-# cd fastq_merged_lanes
+cd fastq_merged_lanes
 
 
-# #***********************************************************************#
-# #RUNNING MAPPING JOB
-# for R1 in *_R1.fastq.gz; 
-# do R2=${R1/_R1/_R2}; 
-#    SAMPLE=${R1%%_*}; 
-#    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
-#    DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
-#    BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
-#    STAR --runThreadN 12 --genomeDir $genome_dir -n 10000 \
-#       --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
-#       --readFilesCommand zcat --readFilesIn $R1 $R2 \
-#       --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
-#       --outFileNamePrefix ${SAMPLE} --quantMode TranscriptomeSAM GeneCounts --twopassMode Basic; 
-# done
+#***********************************************************************#
+#RUNNING MAPPING JOB
+for R1 in *_R1.fastq.gz; 
+do R2=${R1/_R1/_R2}; 
+   SAMPLE=${R1%%_*}; 
+   FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
+   DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
+   BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
+   STAR --runThreadN 12 --genomeDir $genome_dir -n 10000 \
+      --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
+      --readFilesCommand zcat --readFilesIn $R1 $R2 \
+      --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
+      --outFileNamePrefix ${SAMPLE} --quantMode TranscriptomeSAM GeneCounts --twopassMode Basic; 
+done
 
 
-# #***********************************************************************#
-# # CREATION DES INDEXS
-# for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
+#***********************************************************************#
+# CREATION DES INDEXS
+for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
 
 
 ############# QC #############
@@ -66,17 +66,17 @@ echo "QC"
 echo ""
 
 
-#***********************************************************************#
-# echo "RNASEQC"
-# echo ""
+***********************************************************************#
+echo "RNASEQC"
+echo ""
 
-# for i in *Aligned.sortedByCoord.out.bam; 
-#    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
-#    rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded='rf'; 
-# done
+for i in *Aligned.sortedByCoord.out.bam; 
+   do sample=${i/Aligned.sortedByCoord.out.bam/}; 
+   rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded='rf'; 
+done
 
 
-# conda deactivate
+conda deactivate
 
 conda activate gatk4
 
