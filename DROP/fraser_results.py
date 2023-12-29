@@ -39,6 +39,37 @@ run_path_l = run_path.split('/')
 run_name = run_path_l[8]
 
 
+####################################################################################
+## ANNOTATIONS
+
+
+panelapp_f = '/media/jbogoin/Data1/Annotations_RNA-Seq/panelapp/6sep2023/full_panelapp.tsv'
+omim_f = '/media/jbogoin/Data1/Annotations_RNA-Seq/OMIM/6sep2023/genemap2.txt'
+loeuf_f = '/media/jbogoin/Data1/Annotations_RNA-Seq/LOEUF/supplement/loeuf_dataset_grch38.tsv.gz'
+
+
+panelapp_df = pandas.read_csv(panelapp_f, delimiter ="\t", dtype=str)
+print(panelapp_df.columns)
+# 'Gene Symbol'
+
+
+omim_df = pandas.read_csv(omim_f, delimiter ="\t", dtype=str)
+print(omim_df.columns)
+# 'Gene Symbols'
+
+
+loeuf_df = pandas.read_csv(loeuf_f, delimiter ="\t", dtype=str, compression='gzip')
+print(loeuf_df.columns)
+# '#gene'
+
+
+print(brut.columns)
+# 'hgncSymbol'
+
+
+####################################################################################
+
+
 # Trier sur la colonne pvalue
 brut = brut.sort_values(by=["pValue"])
 
