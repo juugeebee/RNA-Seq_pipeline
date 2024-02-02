@@ -8,7 +8,8 @@ echo ""
 
 
 ###
-mv Reports Reports qc/reports_ICM
+
+mv Reports qc/reports_ICM
 rm -rf qc/multiqc*
 ###
 
@@ -60,7 +61,7 @@ done
 for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
 
 
-############# QC #############
+############ QC #############
 
 echo "QC"
 echo ""
@@ -96,7 +97,7 @@ done
 conda deactivate
 
 
-#***********************************************************************#
+***********************************************************************#
 echo "salmon"
 echo ""
 
