@@ -3,6 +3,7 @@ from os import listdir
 import os
 
 chemin = os.getcwd()
+chemin_minus_drop = chemin.strip("/drop")
 chemin_l = chemin.split('/')
 runid = chemin_l[-1]
 
@@ -13,7 +14,7 @@ rna_bam_file = []
 
 for f in listdir("../BAM") :
     if ('Aligned.sortedByCoord.out.bam' in f) and ('bai' not in f) :
-        rna_bam_file.append(chemin + '../BAM/' + f)
+        rna_bam_file.append('/' + chemin_minus_drop + '/BAM/' + f)
         id_l = f.split('Aligned.sortedByCoord')
         sample = id_l[0]
         rnaid.append(sample)

@@ -7,6 +7,11 @@ echo "rnaseq_total.sh start"
 echo ""
 
 
+#########################################
+## A LANCER DANS LE DOSSIER RACINE DU RUN
+#########################################
+
+
 genome_dir='/media/jbogoin/Data1/References/RNA-seq/hg38/STAR'
 
 ref='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v43.primary_assembly.genome.fa'
@@ -20,10 +25,9 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
 
-***********************************************************************#
+***********************************************************************
 echo "FastQC"
 echo ""
-
 
 cd Fastq
 
@@ -110,7 +114,7 @@ conda deactivate
 
 
 
-***********************************************************************#
+#***********************************************************************#
 echo "salmon"
 echo ""
 
@@ -276,6 +280,9 @@ mv *.RNAseqMetrics.txt RnaSeqMetrics
 mkdir -p ../BAM
 # mv !(*.gz) ../BAM
 mv `ls . | grep -v "\.gz$"` ../BAM
+
+
+cd ..
 
 
 #***********************************************************************#

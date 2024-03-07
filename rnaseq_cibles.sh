@@ -75,12 +75,27 @@ conda deactivate
 
 
 ## QC
-conda activate gatk4
+
+#***********************************************************************#
+echo "RNASEQC"
+echo ""
+
+conda activate rnaseq
+
+for i in *Aligned.sortedByCoord.out.bam; 
+   do sample=${i/Aligned.sortedByCoord.out.bam/}; 
+   rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded='rf'; 
+done
+
+conda deactivate
 
 
+
+#***********************************************************************#
 echo "CollectHsMetrics"
 echo ""
 
+conda activate gatk4
 
 # Couverture totale a chaque position du bed
 for i in *Aligned.sortedByCoord.out.bam; 
@@ -95,19 +110,62 @@ for i in *Aligned.sortedByCoord.out.bam;
 done
 
 
+#***********************************************************************#
+echo "CollectRnaSeqMetrics"
+echo ""
+
+for i in *Aligned.sortedByCoord.out.bam; 
+   do sample=${i/Aligned.sortedByCoord.out.bam/}; 
+   gatk CollectRnaSeqMetrics -I $i -O ${sample}.RNAseqMetrics.txt \
+   --REF_FLAT $refflat \
+   -R $ref -STRAND SECOND_READ_TRANSCRIPTION_STRAND \
+   --RIBOSOMAL_INTERVALS '/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.rRNA.transcripts.interval_list'; 
+done
+
+
+conda deactivate
+
+
+#***********************************************************************#
+echo "salmon"
+echo ""
+
+conda activate salmon
+
 mkdir ../QC
+
+# INDEX
+#salmon index -t '/media/jbogoin/Data1/References/RNA-seq/hg19/gencode.v41lift37.transcripts.fa' \
+#-i '/media/jbogoin/Data1/References/RNA-seq/hg19/gencode.v41lift37.transcripts-salmon.idx'
+
+# COUNT
+for R1 in *_R1_001.fastq.gz; 
+   do R2=${R1/_R1/_R2};
+   sample=${R1/_R1_001.fastq.gz/};
+   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg19/gencode.v41lift37.transcripts-salmon.idx' \
+   -l ISR \
+   -1 $R1 -2 $R2 \
+   --validateMappings \
+   -p 24 \
+   -o ../QC/salmon/$sample;
+done
+
+conda deactivate 
+
+
+mv *_RNA-SeQC ../QC
+mv *.RNAseqMetrics.txt ../QC
 mv *.hsMetrics.txt ../QC
 mv *_pertargetcoverage.txt ../QC
 
 cd ../QC
 
 
-conda deactivate
 
+#***********************************************************************#
+echo "MULTIQC"
 
 conda activate rnaseq
-
-echo "MULTIQC"
 
 multiqc -f .
 
@@ -120,6 +178,8 @@ mkdir -p pertargetcoverage
 mv *pertargetcoverage.txt pertargetcoverage/
 mkdir -p RNA-SeQC
 mv *RNA-SeQC RNA-SeQC/
+mkdir -p RnaSeqMetrics
+mv *.RNAseqMetrics.txt RnaSeqMetrics
 
 
 mkdir -p ../BAM
