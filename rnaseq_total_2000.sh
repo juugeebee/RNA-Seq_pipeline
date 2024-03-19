@@ -129,20 +129,12 @@ mkdir -p ../BAM
 mv `ls . | grep -v "\.gz$"` ../BAM
 
 
-#***********************************************************************#
-echo "fraser"
-echo ""
-
-bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
-
-
-
 ### CLEANING
 
+cd ../BAM
 
 mv *_RNA-SeQC ../qc
 mv *.RNAseqMetrics.txt ../qc
-mv drop ../qc
 
 cd ../qc
 
@@ -161,6 +153,14 @@ conda activate rnaseq
 multiqc -f .
 
 conda deactivate
+
+cd ..
+
+#***********************************************************************#
+echo "fraser"
+echo ""
+
+bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
 
 
 echo ""
