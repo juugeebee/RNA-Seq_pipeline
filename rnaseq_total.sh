@@ -25,18 +25,18 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
 
-***********************************************************************
+#***********************************************************************
 echo "FastQC"
 echo ""
 
 cd Fastq
 
-conda activate fastqc
+# conda activate fastqc
 
-mkdir -p ../QC/fastqc
-for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+# mkdir -p ../QC/fastqc
+# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
 
-conda deactivate
+# conda deactivate
 
 
 # ALIGNEMENT
@@ -238,7 +238,8 @@ conda deactivate
 
 ### CLEANING
 
-
+mv Logs ../QC
+mv Reports ../QC
 mv *_RNA-SeQC ../QC
 mv *.RNAseqMetrics.txt ../QC
 # mv *.hsMetrics.txt ../QC
@@ -278,9 +279,10 @@ mv *.RNAseqMetrics.txt RnaSeqMetrics
 
 
 mkdir -p ../BAM
+
+cd ../Fastq
 # mv !(*.gz) ../BAM
 mv `ls . | grep -v "\.gz$"` ../BAM
-
 
 cd ..
 
