@@ -31,16 +31,18 @@ echo ""
 
 cd Fastq
 
-# conda activate fastqc
+conda activate fastqc
 
-# mkdir -p ../QC/fastqc
-# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+mkdir -p ../QC/fastqc
+for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
 
-# conda deactivate
+conda deactivate
 
 
+#***********************************************************************#
 # ALIGNEMENT
 # STAR (Spliced Transcripts Alignment to a Reference)
+
 
 echo ""
 echo "ALIGNEMENT"
@@ -50,9 +52,9 @@ echo ""
 conda activate rnaseq
 
 
-# #***********************************************************************#
-# # GENERATING GENOME INDEXES
-# # STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
+# ***********************************************************************#
+# GENERATING GENOME INDEXES
+# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 
 #***********************************************************************#
@@ -94,12 +96,14 @@ done
 
 conda deactivate
 
-conda activate gatk4
-
 
 #***********************************************************************#
 echo "CollectRnaSeqMetrics"
 echo ""
+
+
+conda activate gatk4
+
 
 for i in *Aligned.sortedByCoord.out.bam; 
    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
@@ -109,9 +113,8 @@ for i in *Aligned.sortedByCoord.out.bam;
    --RIBOSOMAL_INTERVALS /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.rRNA.transcripts.interval_list; 
 done
 
+
 conda deactivate
-
-
 
 
 #***********************************************************************#
@@ -208,7 +211,7 @@ conda deactivate
 # # conda deactivate
 
 
-# #***********************************************************************#
+# #***********************************************************************
 # # echo "kallisto"
 # # echo ""
 
@@ -236,7 +239,9 @@ conda deactivate
 # # conda deactivate
 
 
+#***********************************************************************
 ### CLEANING
+
 
 mv Logs ../QC
 mv Reports ../QC
@@ -292,7 +297,6 @@ echo "fraser"
 echo ""
 
 bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
-
 
 
 echo ""

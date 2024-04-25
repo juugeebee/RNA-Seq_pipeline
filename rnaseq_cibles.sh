@@ -17,42 +17,64 @@ refflat='/media/jbogoin/Data1/References/RNA-seq/hg19/refFlat_hg19.txt'
 gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.genes.gtf'
 # Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
 
+# NG
+# target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.bed'
+# target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.interval_list'
 
-ng_target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.bed'
-ng_target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.interval_list'
+# OA
+target='/media/jbogoin/Data1/References/cibles_panel_OA/CAPONCOV3_design1.bed'
+target_il='/media/jbogoin/Data1/References/cibles_panel_OA/CAPONCOV3_design1.interval_list'
 
 
+#***********************************************************************#
 # TRIMMING DES ADATATEURS
 
-conda activate rnaseq
-
-echo "TRIMMER"
-echo ""
+# echo "TRIMMER"
+# echo ""
 
 cd Fastq
-
-bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
-cd ..
-
-
-## ALIGNEMENT
-## STAR (Spliced Transcripts Alignment to a Reference)
+# conda activate rnaseq
+# bash ~/SCRIPTS/RNA-Seq/agent_trimmer.sh
+# cd ..
 
 
+#***********************************************************************
+echo "FastQC"
+echo ""
+
+conda activate fastqc
+
+mkdir -p ../QC/fastqc
+for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+
+conda deactivate
+
+
+#***********************************************************************#
+# ALIGNEMENT
+# STAR (Spliced Transcripts Alignment to a Reference)
+
+
+echo ""
 echo "ALIGNEMENT"
 echo ""
 
 
-# ## GENERATING GENOME INDEXES
+conda activate rnaseq
+
+
+# ***********************************************************************#
+# GENERATING GENOME INDEXES
 # STAR --runThreadN 12 --runMode genomeGenerate --genomeDir $genome_dir\
-#  --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
+#   --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 
-# ## RUNNING MAPPING JOB
-cd Fastq_trimmed
+#***********************************************************************#
+# RUNNING MAPPING JOB
+# cd Fastq_trimmed
 
-for R1 in *_R1.fastq.gz; 
-    do R2=${R1/_R1./_R2.}; 
+for R1 in *_R1_001.fastq.gz; 
+    do R2=${R1/_R1_/_R2_}; 
     SAMPLE=${R1%%_*}; 
     FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
     DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
@@ -71,16 +93,17 @@ done
 for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
 
 
-conda deactivate
+############# QC #############
+
+echo "QC"
+echo ""
 
 
-## QC
 
 #***********************************************************************#
 echo "RNASEQC"
 echo ""
 
-conda activate rnaseq
 
 for i in *Aligned.sortedByCoord.out.bam; 
    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
@@ -97,15 +120,22 @@ echo ""
 
 conda activate gatk4
 
+
+#***********************************************************************#
 # Couverture totale a chaque position du bed
+echo "pertargetcoverage"
+echo ""
+
+
+
 for i in *Aligned.sortedByCoord.out.bam; 
     do sample=${i%Aligned.sortedByCoord.out.bam}; 
     gatk CollectHsMetrics \
     -I $i \
     -O ${sample}.hsMetrics.txt \
     -R $ref \
-    --BAIT_INTERVALS $ng_target_il \
-    --TARGET_INTERVALS $ng_target_il \
+    --BAIT_INTERVALS $target_il \
+    --TARGET_INTERVALS $target_il \
     --PER_TARGET_COVERAGE ${sample}.pertargetcoverage.txt;
 done
 
@@ -153,6 +183,10 @@ done
 conda deactivate 
 
 
+#***********************************************************************
+### CLEANING
+
+
 mv *_RNA-SeQC ../QC
 mv *.RNAseqMetrics.txt ../QC
 mv *.hsMetrics.txt ../QC
@@ -163,7 +197,8 @@ cd ../QC
 
 
 #***********************************************************************#
-echo "MULTIQC"
+echo "multiqc"
+echo ""
 
 conda activate rnaseq
 
@@ -183,9 +218,21 @@ mv *.RNAseqMetrics.txt RnaSeqMetrics
 
 
 mkdir -p ../BAM
+
+cd ../Fastq
+# cd Fastq_trimmed
 mv `ls . | grep -v "\.gz$"` ../BAM
+
+cd ..
+
+
+#***********************************************************************#
+echo "fraser"
+echo ""
+
+bash ~/SCRIPTS/RNA-Seq/DROP/drop_hg19.sh
 
 
 echo ""
-echo "rnaseq_cilbes.sh job done!"
+echo "rnaseq_cibles.sh job done!"
 echo ""
