@@ -34,16 +34,19 @@ fichier.write("\n")
 ###############
 
 fichier.write("aberrantExpression:\n")
-fichier.write("    run: false\n")
+fichier.write("    run: true\n")
 fichier.write("    groups:\n")
-fichier.write("        - group1\n")
+fichier.write("        - outrider\n")
+# fichier.write("        - outrider_external\n")
 fichier.write("    fpkmCutoff: 1\n")
 fichier.write("    implementation: autoencoder\n")
-fichier.write("    padjCutoff: 0.05\n")
+fichier.write("    padjCutoff: 1\n")
 fichier.write("    zScoreCutoff: 0\n")
 fichier.write("    genesToTest: null\n")
 fichier.write("    maxTestedDimensionProportion: 3\n")
-fichier.write("    yieldSize: 2000000\n")
+fichier.write("    dassie:\n")
+fichier.write("        tssWindow: 500\n")
+fichier.write("        pasWindow: 1000\n")
 
 ###############
 fichier.write("\n")

@@ -5,7 +5,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 
 
 echo ""
-echo "drop.sh start"
+echo "drop_outrider.sh start"
 echo ""
 
 
@@ -13,9 +13,8 @@ mkdir -p drop
 cd drop
 
 
-python ~/SCRIPTS/RNA-Seq/DROP/config_file_hg19.py
-# python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesNG.py
-python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesOA.py
+python ~/SCRIPTS/RNA-Seq/DROP/config_file_outrider.py
+python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation.py
 
 
 conda activate drop_env
@@ -26,8 +25,8 @@ if [ -d "output" ];then
     echo "Le dossier output existe !";
     echo ''
     rm -Rf output;
-    snakemake aberrantSplicing --unlock
     snakemake aberrantExpression --unlock
+
 else :
     echo ''
     echo "Le dossier output n'existe pas !";
@@ -37,14 +36,13 @@ else :
 fi
 
 
-snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100
 snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100
-
 
 
 conda deactivate
 
 
+
 echo ""
-echo "drop.sh job done!"
+echo "drop_outrider.sh job done!"
 echo ""

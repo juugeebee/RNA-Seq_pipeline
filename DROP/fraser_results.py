@@ -93,17 +93,18 @@ loeuf_df['IGV_coordinates'] = loeuf_df['chromosome'] + ':' + loeuf_df['start_pos
 
 
 #### LOEUF
-brut = brut.sort_values(by=['IGV_coordinates'])
+brut = brut.sort_values(by=['hgncSymbol'])
 # data types to string 
-brut = brut.astype(str) 
-print(brut['IGV_coordinates'])
-loeuf_df = loeuf_df.sort_values(by=['IGV_coordinates'])
+brut = brut.astype(str)
+print(brut['hgncSymbol']) 
+
+loeuf_df = loeuf_df.sort_values(by=['#gene'])
 loeuf_df = loeuf_df.astype(str) 
-print(loeuf_df['IGV_coordinates'])
+print(loeuf_df['#gene'])
 
 merge_loeuf = brut.merge(loeuf_df, how='inner',\
- left_on='IGV_coordinates', right_on='IGV_coordinates', \
- suffixes=('_fraser', '_loeuf'))
+  left_on='hgncSymbol', right_on='#gene', \
+  suffixes=('_fraser', '_loeuf'))
 
 print(merge_loeuf)
 
