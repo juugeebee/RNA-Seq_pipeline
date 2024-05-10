@@ -36,8 +36,8 @@ else :
 fi
 
 
-snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100
-snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100
+snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantSplicing.log
+snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantExpression.log
 
 
 conda deactivate

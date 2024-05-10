@@ -22,8 +22,12 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.gene
 # target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.interval_list'
 
 # OA
-target='/media/jbogoin/Data1/References/cibles_panel_OA/CAPONCOV3_design1.bed'
-target_il='/media/jbogoin/Data1/References/cibles_panel_OA/CAPONCOV3_design1.interval_list'
+# target='/media/jbogoin/Data1/References/cibles_panel_OA/CAPONCOV3_design1.bed'
+# target_il='/media/jbogoin/Data1/References/cibles_panel_OA/CAPONCOV3_design1.interval_list'
+
+#globines
+target=
+target_il=
 
 
 #***********************************************************************#
