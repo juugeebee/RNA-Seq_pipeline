@@ -24,6 +24,10 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
+#NG
+target = '/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
+target_il = '/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
+
 
 #***********************************************************************
 #echo "FastQC"
@@ -31,13 +35,12 @@ gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary
 
 cd Fastq
 
-# conda activate fastqc
+conda activate fastqc
 
-# mkdir -p ../QC/fastqc
-# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-# # for R1 in FC0000342-BCC_L0*_Read1_Sample_Library_*.fastq.gz; do R2=${R1/_Read1/_Read2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+mkdir -p ../QC/fastqc
+for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
 
-# conda deactivate
+conda deactivate
 
 
 #***********************************************************************#
@@ -62,11 +65,7 @@ conda activate rnaseq
 #RUNNING MAPPING JOB
 for R1 in *_R1_001.fastq.gz; 
 do R2=${R1/_R1/_R2}; 
-   SAMPLE=${R1%%_*}; 
-# for R1 in FC0000342-BCC_L0*_Read1_Sample_Library_*.fastq.gz;
-# do R2=${R1/_Read1/_Read2};
-   # FILE="$(awk -F\_ ' { print $(NF) } ' <<< "${R1}")"
-   # SAMPLE=${FILE%%.*};
+   SAMPLE=${R1%%_*};
    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
    DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
    BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
@@ -74,7 +73,8 @@ do R2=${R1/_R1/_R2};
       --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
       --readFilesCommand zcat --readFilesIn $R1 $R2 \
       --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
-      --outFileNamePrefix ${SAMPLE} --quantMode TranscriptomeSAM GeneCounts --twopassMode Basic; 
+      --outFileNamePrefix ${SAMPLE} \
+      --twopassMode Basic; 
 done
 
 
@@ -130,21 +130,21 @@ conda activate salmon
 
 
 # INDEX
-#salmon index -t '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts.fa' \
-#-i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx'
+# salmon index -t '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts.fa' \
+# -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx'
 
 
 # COUNT
-# for R1 in *_R1_001.fastq.gz; 
-#    do R2=${R1/_R1/_R2};
-#    sample=${R1/_S**_R1_001.fastq.gz/};
-#    salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx' \
-#    -l ISR \
-#    -1 $R1 -2 $R2 \
-#    --validateMappings \
-#    -p 24 \
-#    -o ../QC/salmon/$sample;
-# done
+for R1 in *_R1_001.fastq.gz; 
+   do R2=${R1/_R1/_R2};
+   sample=${R1%%_*};
+   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx' \
+   -l ISR \
+   -1 $R1 -2 $R2 \
+   --validateMappings \
+   -p 24 \
+   -o ../QC/salmon/$sample;
+done
 
 
 conda deactivate
@@ -299,10 +299,10 @@ cd ..
 
 
 #***********************************************************************#
-echo "fraser"
-echo ""
+# echo "fraser"
+# echo ""
 
-bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
+# bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
 
 
 echo ""

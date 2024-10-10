@@ -14,8 +14,8 @@ cd drop
 
 
 python ~/SCRIPTS/RNA-Seq/DROP/config_file_hg19.py
-# python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesNG.py
-python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesOA.py
+python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesNG.py
+# python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesOA.py
 
 
 conda activate drop_env

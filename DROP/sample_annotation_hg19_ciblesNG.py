@@ -64,7 +64,7 @@ rnaid.append('6622NG001445-FSP_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_hg19_ciblesNG/PAXgene/6622NG001445-FSPAligned.sortedByCoord.out.bam')
 rnaid.append('6622NG001445b-FSP_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_hg19_ciblesNG/PAXgene/6622NG001445-FSPAligned.sortedByCoord.out.bam')
-#double
+# double
 
 #double
 rnaid.append('6622NG001886-FHM_ref')

@@ -55,7 +55,7 @@ fichier.write("\n")
 fichier.write("aberrantSplicing:\n")
 fichier.write("    run: true\n")
 fichier.write("    groups:\n")
-fichier.write("        - fraser\n")
+fichier.write("        - fraser2\n")
 # fichier.write("        - fraser_external\n")
 fichier.write("    recount: true\n")
 fichier.write("    longRead: false\n")
@@ -68,14 +68,14 @@ fichier.write("    padjCutoff: 1\n")
 fichier.write("    maxTestedDimensionProportion: 6\n")
     
     ### FRASER1 configuration
-fichier.write('    FRASER_version: "FRASER"\n')
-fichier.write('    deltaPsiCutoff : 0.3\n') 
-fichier.write('    quantileForFiltering: 0.95\n') 
+# fichier.write('    FRASER_version: "FRASER"\n')
+# fichier.write('    deltaPsiCutoff : 0.3\n') 
+# fichier.write('    quantileForFiltering: 0.95\n') 
     
     ### For FRASER2, use the follwing parameters instead of the 3 lines above:
-    # FRASER_version: "FRASER2"
-    # deltaPsiCutoff : 0.1
-    # quantileForFiltering: 0.75
+fichier.write('    FRASER_version: "FRASER2"\n')
+fichier.write('    deltaPsiCutoff : 0.1\n') 
+fichier.write('    quantileForFiltering: 0.75\n')
 
 ###############
 fichier.write("\n")

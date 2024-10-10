@@ -18,10 +18,18 @@ for f in listdir('.'):
 #     "21NG002225": "Paxgene", "18NG001723": "Paxgene", "18NG002044": "Paxgene", "17NG002384": "Paxgene"}
 
 
-tissus_dic = {"14OA000513": "Paxgene", "20OA000508": "Paxgene", "20OA000549": "Paxgene", "20OA001880": "Paxgene", "6619OA002094": "Paxgene", 
-              "6619OA002863": "Paxgene", "6619OA002865": "Paxgene", "6620OA002899": "Paxgene", "6620OA003962": "Paxgene", "6621OA002468": "Paxgene",
-              "6621OA003244": "Paxgene", "6621OA003399": "Paxgene", "6621OA003582": "Paxgene", "6622OA004101": "Paxgene", "6623OA001275": "Paxgene",
-              "6623OA004806": "Paxgene"}
+# tissus_dic = {"14OA000513": "Paxgene", "20OA000508": "Paxgene", "20OA000549": "Paxgene", "20OA001880": "Paxgene", "6619OA002094": "Paxgene", 
+#               "6619OA002863": "Paxgene", "6619OA002865": "Paxgene", "6620OA002899": "Paxgene", "6620OA003962": "Paxgene", "6621OA002468": "Paxgene",
+#               "6621OA003244": "Paxgene", "6621OA003399": "Paxgene", "6621OA003582": "Paxgene", "6622OA004101": "Paxgene", "6623OA001275": "Paxgene",
+#               "6623OA004806": "Paxgene"}
+
+
+tissus_dic = {"6624NG001690": "Paxgene", "6624NG001691": "Paxgene", "6624NG001692": "Paxgene", "6624NG001808": "Paxgene", "6624NG001809": "Paxgene", 
+    "6624NG001810" : "Paxgene", "6624NG001499": "Paxgene", "6624NG001498": "Paxgene", "6624NG001497": "Paxgene", "6624NG001503": "Paxgene", 
+    "6624NG001502": "Paxgene", "6624NG001501": "Paxgene", "6624NG002150": "Paxgene", "6624NG002149": "Paxgene", "6624NG002148": "Paxgene", 
+    "6624NG002212": "Paxgene", "6624NG002211": "Paxgene", "6624NG002210": "Paxgene"} 
+
+
 
 
 tissus = []
@@ -186,7 +194,7 @@ df_pax.drop_duplicates(subset=['chrom', 'start', 'end'], keep='first', inplace=T
 # df_lympho_f.to_csv('synthese_lymphocyte.csv', sep='\t', index=False)
 
 
-df_pax.to_csv('synthese_paxgene.csv', sep='\t', index=False)
-
+# df_pax.to_csv('synthese_paxgene.csv', sep='\t', index=False)
+df_pax.to_csv('synthese_exome_vs_pagem.csv', sep='\t', index=False)
 
 print('\nJob done!\n')
