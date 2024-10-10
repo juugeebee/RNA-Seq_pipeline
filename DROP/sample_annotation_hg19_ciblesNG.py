@@ -125,7 +125,7 @@ rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_hg19_ciblesNG/PAXgene/18NG001
 df['RNA_ID'] = rnaid
 df['RNA_BAM_FILE'] = rna_bam_file
 #df['DROP_GROUP'] = 'fraser,fraser_external,batch_0,group1,PAXgene'
-df['DROP_GROUP'] = 'fraser,outrider,batch_0,group1,PAXgene'
+df['DROP_GROUP'] = 'fraser2,outrider,batch_0,group1,PAXgene'
 df['PAIRED_END'] = 'TRUE'
 df['STRAND'] = 'REVERSE'
 df['COUNT_MODE'] = 'Union'

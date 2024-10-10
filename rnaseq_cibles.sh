@@ -22,17 +22,17 @@ gtf_file='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.anno
 gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.genes.gtf'
 #Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
 
-#NG
-target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.bed'
-target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.interval_list'
+# #NG
+# target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.bed'
+# target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.interval_list'
 
-# #OA
-# target='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON.bed'
-# target_il='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON.interval_list'
+#OA
+target='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON.bed'
+target_il='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON.interval_list'
 
-# #globines
-# target_glob='/media/jbogoin/Data1/References/fa_hg19/rna-seq/globines_hg19.bed'
-# target_glob_il='/media/jbogoin/Data1/References/fa_hg19/rna-seq/globines_hg19.interval_list'
+#globines
+target_glob='/media/jbogoin/Data1/References/fa_hg19/rna-seq/globines_hg19.bed'
+target_glob_il='/media/jbogoin/Data1/References/fa_hg19/rna-seq/globines_hg19.interval_list'
 
 
 #***********************************************************************#
@@ -82,7 +82,7 @@ conda activate rnaseq
 
 #***********************************************************************#
 # GENERATING GENOME INDEXES
-# STAR --runThreadN 12 --runMode genomeGenerate --genomeDir $genome_dir\
+# STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
 #   --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 
@@ -127,7 +127,6 @@ done
 conda deactivate
 
 
-
 #***********************************************************************#
 echo "CollectHsMetrics"
 echo ""
@@ -154,17 +153,17 @@ for i in *Aligned.sortedByCoord.out.bam;
 done
 
 
-# #GLOBINES
-# for i in *Aligned.sortedByCoord.out.bam; 
-#     do sample=${i%Aligned.sortedByCoord.out.bam}; 
-#     gatk CollectHsMetrics \
-#     -I $i \
-#     -O ${sample}.hsMetrics_glob.txt \
-#     -R $ref \
-#     --BAIT_INTERVALS $target_glob_il \
-#     --TARGET_INTERVALS $target_glob_il \
-#     --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_globines.txt;
-# done
+#GLOBINES
+for i in *Aligned.sortedByCoord.out.bam; 
+    do sample=${i%Aligned.sortedByCoord.out.bam}; 
+    gatk CollectHsMetrics \
+    -I $i \
+    -O ${sample}.hsMetrics_glob.txt \
+    -R $ref \
+    --BAIT_INTERVALS $target_glob_il \
+    --TARGET_INTERVALS $target_glob_il \
+    --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_globines.txt;
+done
 
 
 #***********************************************************************#
@@ -255,7 +254,7 @@ cd ..
 
 
 #***********************************************************************#
-echo "fraser"
+echo "DROP"
 echo ""
 
 bash ~/SCRIPTS/RNA-Seq/DROP/drop_hg19.sh

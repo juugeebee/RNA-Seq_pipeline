@@ -5,7 +5,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 
 
 echo ""
-echo "drop.sh start"
+echo "drop_hg19.sh start"
 echo ""
 
 
@@ -14,8 +14,8 @@ cd drop
 
 
 python ~/SCRIPTS/RNA-Seq/DROP/config_file_hg19.py
-python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesNG.py
-# python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesOA.py
+#python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesNG.py
+python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_hg19_ciblesOA.py
 
 
 conda activate drop_env
@@ -46,5 +46,5 @@ conda deactivate
 
 
 echo ""
-echo "drop.sh job done!"
+echo "drop_hg19.sh job done!"
 echo ""

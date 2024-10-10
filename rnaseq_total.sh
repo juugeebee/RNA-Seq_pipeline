@@ -25,8 +25,8 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
 #NG
-target = '/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
-target_il = '/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
+target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
+target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
 
 
 #***********************************************************************
@@ -38,7 +38,8 @@ cd Fastq
 conda activate fastqc
 
 mkdir -p ../QC/fastqc
-for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
 
 conda deactivate
 
@@ -63,7 +64,8 @@ conda activate rnaseq
 
 #***********************************************************************#
 #RUNNING MAPPING JOB
-for R1 in *_R1_001.fastq.gz; 
+# for R1 in *_R1_001.fastq.gz; 
+for R1 in *_R1.fastq.gz;
 do R2=${R1/_R1/_R2}; 
    SAMPLE=${R1%%_*};
    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
@@ -103,11 +105,34 @@ conda deactivate
 
 
 #***********************************************************************#
-echo "CollectRnaSeqMetrics"
+echo "CollectHsMetrics"
+echo ""
+
+conda activate gatk4
+
+
+#***********************************************************************#
+# Couverture totale a chaque position du bed neuro
+echo "pertargetcoverage"
 echo ""
 
 
-conda activate gatk4
+#CIBLES
+for i in *Aligned.sortedByCoord.out.bam; 
+    do sample=${i%Aligned.sortedByCoord.out.bam}; 
+    gatk CollectHsMetrics \
+    -I $i \
+    -O ${sample}.hsMetrics.txt \
+    -R $ref \
+    --BAIT_INTERVALS $target_il \
+    --TARGET_INTERVALS $target_il \
+    --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_cibles.txt;
+done
+
+
+#***********************************************************************#
+echo "CollectRnaSeqMetrics"
+echo ""
 
 
 for i in *Aligned.sortedByCoord.out.bam; 
@@ -122,7 +147,7 @@ done
 conda deactivate
 
 
-***********************************************************************#
+#***********************************************************************#
 echo "salmon"
 echo ""
 
@@ -135,7 +160,8 @@ conda activate salmon
 
 
 # COUNT
-for R1 in *_R1_001.fastq.gz; 
+# for R1 in *_R1_001.fastq.gz; 
+for R1 in *_R1.fastq.gz; 
    do R2=${R1/_R1/_R2};
    sample=${R1%%_*};
    salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx' \
@@ -298,8 +324,8 @@ mv `ls . | grep -v "\.gz$"` ../BAM
 cd ..
 
 
-#***********************************************************************#
-# echo "fraser"
+# #***********************************************************************#
+# echo "DROP"
 # echo ""
 
 # bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
