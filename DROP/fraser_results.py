@@ -6,7 +6,7 @@ print('\n*** Mise en forme et annotations fraser. *** \n')
 
 
 # Importer le tsv dans un dataframe
-brut = pandas.read_csv('results_gene_all_17042024.tsv', delimiter ="\t", dtype=str)
+brut = pandas.read_csv('results_gene_all.tsv', delimiter ="\t", dtype=str)
 
 
 # Supprimer les colonnes inutiles

@@ -38,8 +38,8 @@ cd Fastq
 conda activate fastqc
 
 mkdir -p ../QC/fastqc
-# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+#for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
 
 conda deactivate
 
@@ -64,8 +64,8 @@ conda activate rnaseq
 
 #***********************************************************************#
 #RUNNING MAPPING JOB
-# for R1 in *_R1_001.fastq.gz; 
-for R1 in *_R1.fastq.gz;
+for R1 in *_R1_001.fastq.gz; 
+#for R1 in *_R1.fastq.gz;
 do R2=${R1/_R1/_R2}; 
    SAMPLE=${R1%%_*};
    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
@@ -160,8 +160,8 @@ conda activate salmon
 
 
 # COUNT
-# for R1 in *_R1_001.fastq.gz; 
-for R1 in *_R1.fastq.gz; 
+for R1 in *_R1_001.fastq.gz; 
+#for R1 in *_R1.fastq.gz; 
    do R2=${R1/_R1/_R2};
    sample=${R1%%_*};
    salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx' \
@@ -279,8 +279,8 @@ mv Reports ../QC
 mv Stats ../QC
 mv *_RNA-SeQC ../QC
 mv *.RNAseqMetrics.txt ../QC
-# mv *.hsMetrics.txt ../QC
-# mv *_pertargetcoverage.txt ../QC
+mv *.hsMetrics.txt ../QC
+mv *pertargetcoverage* ../QC
 # mv *_featureCounts* ../QC
 # mv *.stat ../QC
 # mv *.results ../QC
@@ -300,10 +300,10 @@ multiqc -f .
 conda deactivate
 
 
-# mkdir -p hsMetrics
-# mv *.hsMetrics.txt hsMetrics
-# mkdir -p pertargetcoverage
-# mv *_pertargetcoverage.txt pertargetcoverage
+mkdir -p hsMetrics
+mv *.hsMetrics.txt hsMetrics
+mkdir -p pertargetcoverage
+mv *pertargetcoverage* pertargetcoverage
 mkdir -p RNA-SeQC
 mv *RNA-SeQC RNA-SeQC
 mkdir -p RnaSeqMetrics
@@ -324,11 +324,11 @@ mv `ls . | grep -v "\.gz$"` ../BAM
 cd ..
 
 
-# #***********************************************************************#
-# echo "DROP"
-# echo ""
+#***********************************************************************#
+echo "DROP"
+echo ""
 
-# bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
+bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
 
 
 echo ""

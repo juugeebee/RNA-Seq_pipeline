@@ -236,7 +236,7 @@ conda deactivate
 mkdir -p hsMetrics
 mv *hsMetrics.txt hsMetrics/
 mkdir -p pertargetcoverage
-mv *pertargetcoverage_cibles* pertargetcoverage/
+mv *pertargetcoverage* pertargetcoverage/
 mkdir -p RNA-SeQC
 mv *RNA-SeQC RNA-SeQC/
 mkdir -p RnaSeqMetrics

@@ -6,7 +6,7 @@ print('\n*** Mise en forme et annotations outrider. *** \n')
 
 
 # Importer le tsv dans un dataframe
-brut = pandas.read_csv('OUTRIDER_results_17042024.tsv', delimiter ="\t", dtype=str)
+brut = pandas.read_csv('OUTRIDER_results.tsv', delimiter ="\t", dtype=str)
 
 
 # Supprimer les patients _ref
