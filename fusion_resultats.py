@@ -24,10 +24,9 @@ for f in listdir('.'):
 #               "6623OA004806": "Paxgene"}
 
 
-tissus_dic = {"6624NG001690": "Paxgene", "6624NG001691": "Paxgene", "6624NG001692": "Paxgene", "6624NG001808": "Paxgene", "6624NG001809": "Paxgene", 
-    "6624NG001810" : "Paxgene", "6624NG001499": "Paxgene", "6624NG001498": "Paxgene", "6624NG001497": "Paxgene", "6624NG001503": "Paxgene", 
-    "6624NG001502": "Paxgene", "6624NG001501": "Paxgene", "6624NG002150": "Paxgene", "6624NG002149": "Paxgene", "6624NG002148": "Paxgene", 
-    "6624NG002212": "Paxgene", "6624NG002211": "Paxgene", "6624NG002210": "Paxgene"} 
+tissus_dic = {"6622CY000890": "Paxgene", "6622CY000891": "Paxgene", "6622CY000892": "Paxgene", "6622CY000893": "Paxgene", "6624CY000134": "Paxgene", 
+    "6624CY000135" : "Paxgene", "6624CY000196": "Paxgene", "6624CY000197": "Paxgene", "6624CY000203": "Paxgene", "6624CY000204": "Paxgene", 
+    "6624CY000205": "Paxgene", "6624CY000214": "Paxgene", "6624CY000220": "Paxgene", "6624CY000221": "Paxgene", "6624CY000222": "Paxgene"} 
 
 
 
@@ -195,6 +194,6 @@ df_pax.drop_duplicates(subset=['chrom', 'start', 'end'], keep='first', inplace=T
 
 
 # df_pax.to_csv('synthese_paxgene.csv', sep='\t', index=False)
-df_pax.to_csv('synthese_exome_vs_pagem.csv', sep='\t', index=False)
+df_pax.to_csv('synthese_rnaseqtot_ng.csv', sep='\t', index=False)
 
 print('\nJob done!\n')

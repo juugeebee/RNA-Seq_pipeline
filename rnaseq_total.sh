@@ -125,8 +125,8 @@ for i in *Aligned.sortedByCoord.out.bam;
     -O ${sample}.hsMetrics.txt \
     -R $ref \
     --BAIT_INTERVALS $target_il \
-    --TARGET_INTERVALS $target_il \
-    --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_cibles.txt;
+    --TARGET_INTERVALS $target_il; \
+   #  --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_cibles.txt;
 done
 
 
@@ -154,9 +154,24 @@ echo ""
 conda activate salmon
 
 
-# INDEX
+###### INDEX ######
 # salmon index -t '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts.fa' \
 # -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx'
+
+# salmon index -t '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts.fa' \
+#    -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon-format.idx' --gencode
+
+### Generating a decoy-aware transcriptome ###
+# https://combine-lab.github.io/alevin-tutorial/2019/selective-alignment/
+# grep "^>" <(gunzip -c /media/jbogoin/Data1/References/RNA-seq/hg38/salmon/GRCh38.primary_assembly.genome.fa.gz) \
+#    | cut -d " " -f 1 > /media/jbogoin/Data1/References/RNA-seq/hg38/salmon/decoys.txt
+# sed -i.bak -e 's/>//g' /media/jbogoin/Data1/References/RNA-seq/hg38/salmon/decoys.txt
+# cat '/media/jbogoin/Data1/References/RNA-seq/hg38/salmon/gencode.v47.transcripts.fa.gz' \
+#    '/media/jbogoin/Data1/References/RNA-seq/hg38/salmon/GRCh38.primary_assembly.genome.fa.gz' \
+#    > '/media/jbogoin/Data1/References/RNA-seq/hg38/salmon/gentrome.fa.gz'
+# salmon index -t '/media/jbogoin/Data1/References/RNA-seq/hg38/salmon/gentrome.fa.gz' \
+#    -d '/media/jbogoin/Data1/References/RNA-seq/hg38/salmon/decoys.txt' \
+#    -p 12 i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon-format-decoys.idx' --gencode
 
 
 # COUNT
@@ -164,7 +179,7 @@ for R1 in *_R1_001.fastq.gz;
 #for R1 in *_R1.fastq.gz; 
    do R2=${R1/_R1/_R2};
    sample=${R1%%_*};
-   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon.idx' \
+   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon-format.idx' \
    -l ISR \
    -1 $R1 -2 $R2 \
    --validateMappings \
