@@ -119,14 +119,14 @@ echo ""
 
 #CIBLES
 for i in *Aligned.sortedByCoord.out.bam; 
-    do sample=${i%Aligned.sortedByCoord.out.bam}; 
-    gatk CollectHsMetrics \
-    -I $i \
-    -O ${sample}.hsMetrics.txt \
-    -R $ref \
-    --BAIT_INTERVALS $target_il \
-    --TARGET_INTERVALS $target_il; \
-   #  --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_cibles.txt;
+   do sample=${i%Aligned.sortedByCoord.out.bam}
+      gatk CollectHsMetrics \
+      -I $i \
+      -O ${sample}.hsMetrics.txt \
+      -R $ref \
+      --BAIT_INTERVALS $target_il \
+      --TARGET_INTERVALS $target_il \
+      --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_cibles.txt;
 done
 
 

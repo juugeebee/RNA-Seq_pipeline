@@ -152,7 +152,7 @@ def panelapp_parser(ensemblD, panelapp_f):
 								ensemblD[ensembl_id]['panelapp'] = cat_hits
 							if ensemblD[ensembl_id]['panelapp'] != '':
 								if cat_hits not in ensemblD[ensembl_id]['panelapp']:
-									ensemblD[ensembl_id]['panelapp'] += "," + cat_hits
+									ensemblD[ensembl_id]['panelapp'] += "," + cat_hits							
 	return ensemblD
 
 
@@ -650,12 +650,33 @@ cols = ['sampleID', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'stran
 	   'pValue', 'psiValue', 'deltaPsi', 'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 'hgnc_id', 
 	   'entrez_id', 'omim_geneID', 'panelapp', 'omim_disease', 'omim_inheritance', 'hpo', 'clinvar', 'loeuf', 'UTR_overlap', 
 	   'counts', 'totalCounts', 'meanCounts', 'meanTotalCounts', 'nonsplitCounts', 'nonsplitProportion', 'nonsplitProportion_99quantile', 
-	   , 'blacklist']
+	   'blacklist']
 df_final = df_final.reindex(cols, axis=1)
 
 
 writer = pandas.ExcelWriter('./Fichiers_annotes/FRASER2_' + run_name + '_annote.xlsx', engine='xlsxwriter')
+
 df_final.to_excel(writer,sheet_name = "FRASER2", index=False)
+
+#coloration panelapp
+workbook  = writer.book
+worksheet = writer.sheets['FRASER2']
+greenFormat  = workbook.add_format({'bg_color': 'lime'})
+worksheet.conditional_format('U2:B5000', {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': '(G)',
+                                       'format': greenFormat})
+redFormat  = workbook.add_format({'bg_color': 'red'})
+worksheet.conditional_format('U2:B5000', {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': '(R)',
+                                       'format': redFormat})
+yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
+worksheet.conditional_format('U2:B5000', {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': '(A)',
+                                       'format': yellowFormat})
+
 writer.save() 
 
 
