@@ -21,7 +21,8 @@ overlapLimit = args.o
 
 
 hgnc_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/HGNC/1mar2024/hgnc.tsv"
-panelapp_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/1mar2024/full_panelapp.tsv"
+panelapp_eng_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/20nov2024/panelapp_england.tsv"
+panelapp_aus_f = '/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/20nov2024/panelapp_australia.tsv'
 clinvar_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/clinvar/1mar2024/gene_condition_source_id"
 omim_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/OMIM/1mar2024/genemap2.txt"
 hpo_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/HPO/1mar2024/genes_to_phenotype.txt"
@@ -45,10 +46,10 @@ def hgnc_parser(ensemblD, hgnc_f):
 		for line in hgnc:
 			line = line.strip('\n')
 			if not line.startswith("HGNC ID\tApproved symbol"):
-				hgnc_id, geneSymbol, alias_symbols, refseq_id, entrez_id, ensembl_id = "", "", "", "", "", ""
+				hgnc_id, gene_symbol, alias_symbols, refseq_id, entrez_id, ensembl_id = "", "", "", "", "", ""
 				items = line.split("\t")
 				hgnc_id = items[0]
-				geneSymbol = items[1]
+				gene_symbol = items[1]
 				alias_symbols = items[2]
 				entrez_id = items[5]
 				omim_geneID = items[6]
@@ -60,14 +61,14 @@ def hgnc_parser(ensemblD, hgnc_f):
 					if ensembl_id not in ensemblD:
 						ensemblD[ensembl_id] = {}
 						ensemblD[ensembl_id]['hgnc_id'] = hgnc_id
-						ensemblD[ensembl_id]['geneSymbol'] = geneSymbol
+						ensemblD[ensembl_id]['gene_symbol'] = gene_symbol
 						ensemblD[ensembl_id]['entrez_id'] = entrez_id
 						ensemblD[ensembl_id]['omim_geneID'] = omim_geneID
 					else:
 						if ensemblD[ensembl_id]['hgnc_id'] == '':
 							ensemblD[ensembl_id]['hgnc_id'] = hgnc_id
-						if ensemblD[ensembl_id]['geneSymbol'] == '':
-							ensemblD[ensembl_id]['geneSymbol'] = geneSymbol
+						if ensemblD[ensembl_id]['gene_symbol'] == '':
+							ensemblD[ensembl_id]['gene_symbol'] = gene_symbol
 						if ensemblD[ensembl_id]['entrez_id'] == '':
 							ensemblD[ensembl_id]['entrez_id'] = entrez_id
 						if ensemblD[ensembl_id]['omim_geneID'] == '':
@@ -75,84 +76,73 @@ def hgnc_parser(ensemblD, hgnc_f):
 	return ensemblD
 
 
-def panelapp_parser(ensemblD, panelapp_f):
+def panelapp_parser(ensembl_d, panelapp_f):
 	with open(panelapp_f, 'r') as panelapp:
+		if "panelapp_australia.tsv" in panelapp_f:
+			which_panelapp = "panelapp_aus"
+		elif "panelapp_england.tsv" in panelapp_f:
+			which_panelapp = "panelapp_eng"
 		for line in panelapp:
 			line = line.strip('\n')
-			if not line.startswith("Entity Name\tEntity type"):
-				entity_name, entity_type, geneSymbol, sources, color, level4, level3, level2, moi, pheno, ensembl_id, hgnc_id, cat_hits, abv = "", "", "", "", "", "", "", "", "", "", "", "", "", ""
-				matcher = re.match(r'^(.*\t)(".*\t.*")(\t.*)$', line)
-				if matcher:
-					g1 = matcher.group(1)
-					g2 = matcher.group(2)
-					g3 = matcher.group(3)
-					line = g1 + g2.replace('\t',' ') + g3
-				items = line.replace(";",",").split("\t")
-				entity_name = items[0]
-				entity_type = items[1]
-				if entity_type == "gene":
-					geneSymbol = items[2]
-					sources = items[3]
-					if "Expert Review Green" in sources:
-						color = "(G)"
-					elif "Expert Review Amber" in sources:
-						color = "(A)"
-					elif "Expert Review Red" in sources:
-						color = "(R)"
-					level4 = items[4]
-					level3 = items[5]
-					level2 = items[6]
-					moi = items[7]
-					if moi.startswith('MONOALLELIC, autosomal or pseudoautosomal'):
-						if 'maternally imprinted' in moi:
-							abv = 'IMP_patexp'
-						elif 'paternally imprinted' in moi:
-							abv = 'IMP_matexp'
-						else:
-							abv = 'AD'
-					elif moi == 'BIALLELIC, autosomal or pseudoautosomal' or moi == 'BOTH monoallelic and biallelic, autosomal or pseudoautosomal':
-						abv = 'AR'
-					elif moi == 'BOTH monoallelic and biallelic (but BIALLELIC mutations cause a more SEVERE disease form), autosomal or pseudoautosomal':
-						abv = 'AD/AR'
-					elif moi == 'X-LINKED: hemizygous mutation in males, biallelic mutations in females':
-						abv = 'XLR'
-					elif moi == 'X-LINKED: hemizygous mutation in males, monoallelic mutations in females may cause disease (may be less severe, later onset than males)' or moi == 'X linked: hemizygous mutation in males, monoallelic mutations in females may cause disease (may be less severe, later onset than males)':
-						abv = 'XL'
-					elif moi == 'MITOCHONDRIAL':
-						abv = 'mito'
-					elif moi == '' or moi == 'unknown' or moi.startswith('Othe'):
-						abv = 'unk'
+			if "Mode of Inheritance\tPanel Name\tConfidence" not in line:
+				gene_symbol, ensembl_id, moi, level, color, panel, abv = "","","","","","",""
 
-					phen = items[8].replace('omim:','OMIM:').replace('mondo:','MONDO:').replace('{','').replace('}','')
-					phen = re.sub(' +', ' ', phen)
-					ensembl_id = items[21]
-					hgnc_id = items[22]
-					if ensembl_id == '-':
-						ensembl_id = ''
-					if hgnc_id == '-':
-						hgnc_id = ''
-					if color != '':
-						cat_hits = color + "|" + level4 + "|" + abv
+				gene_symbol = line.split("\t")[1]
+				ensembl_id = line.split("\t")[2]
+				hgnc_id = line.split("\t")[3]
+				moi = line.split("\t")[4]
+				panel = line.split("\t")[5]
+				if panel == "COVID-19 research":
+					continue
+				level = line.split("\t")[6]
+				evidence = line.split("\t")[7]
+
+				if moi.startswith('MONOALLELIC, autosomal or pseudoautosomal'):
+					if 'maternally imprinted' in moi:
+						abv = 'IMP_patexp'
+					elif 'paternally imprinted' in moi:
+						abv = 'IMP_matexp'
 					else:
-						cat_hits = level4 + '|' + abv
+						abv = 'AD'
+				elif moi == 'BIALLELIC, autosomal or pseudoautosomal' or moi == 'BOTH monoallelic and biallelic, autosomal or pseudoautosomal':
+					abv = 'AR'
+				elif moi.startswith('BOTH monoallelic and biallelic'):
+					abv = 'AD/AR'
+				elif moi == 'X-LINKED: hemizygous mutation in males, biallelic mutations in females':
+					abv = 'XLR'
+				elif moi == 'X-LINKED: hemizygous mutation in males, monoallelic mutations in females may cause disease (may be less severe, later onset than males)' or moi == 'X linked: hemizygous mutation in males, monoallelic mutations in females may cause disease (may be less severe, later onset than males)':
+					abv = 'XL'
+				elif moi == 'MITOCHONDRIAL':
+					abv = 'mito'
+				elif moi == '' or moi == 'Unknown' or moi.startswith('Othe'):
+					abv = 'unk'
+				else:
+					abv = moi
+			
+				cat_hits = "Lvl" + level + "|" + abv + "|" + panel
+				# print(gene_symbol,ensembl_id,cat_hits)
 
-					""" ENSEMBL ID DICTIONARY """
-					if ensembl_id != '':
-						if ensembl_id not in ensemblD:
-							ensemblD[ensembl_id] = {}
-							ensemblD[ensembl_id]['hgnc_id'] = hgnc_id
-							ensemblD[ensembl_id]['geneSymbol'] = geneSymbol
-							ensemblD[ensembl_id]['panelapp'] = cat_hits
-						else:
-							if ensemblD[ensembl_id]['hgnc_id'] == '':
-								ensemblD[ensembl_id]['hgnc_id'] = hgnc_id
-							if ensemblD[ensembl_id]['geneSymbol'] == '':
-								ensemblD[ensembl_id]['geneSymbol'] = geneSymbol
-							if ensemblD[ensembl_id]['panelapp'] == '':
-								ensemblD[ensembl_id]['panelapp'] = cat_hits
-							if ensemblD[ensembl_id]['panelapp'] != '':
-								if cat_hits not in ensemblD[ensembl_id]['panelapp']:
-									ensemblD[ensembl_id]['panelapp'] += "," + cat_hits							
+				""" ENSEMBL ID DICTIONARY """
+				if ensembl_id != '':
+					if ensembl_id not in ensembl_d:
+						ensembl_d[ensembl_id] = {}
+						ensembl_d[ensembl_id]['hgnc_id'] = hgnc_id
+						ensembl_d[ensembl_id]['gene_symbol'] = gene_symbol
+						ensembl_d[ensembl_id][which_panelapp] = cat_hits
+					else:
+						if ensembl_d[ensembl_id]['hgnc_id'] == '':
+							ensembl_d[ensembl_id]['hgnc_id'] = hgnc_id
+						if ensembl_d[ensembl_id]['gene_symbol'] == '':
+							ensembl_d[ensembl_id]['gene_symbol'] = gene_symbol
+						if ensembl_d[ensembl_id][which_panelapp] == '':
+							ensembl_d[ensembl_id][which_panelapp] = cat_hits
+						if ensembl_d[ensembl_id][which_panelapp] != '':
+							if cat_hits not in ensembl_d[ensembl_id][which_panelapp]:
+								ensembl_d[ensembl_id][which_panelapp] += "," + cat_hits
+				else:
+					# pas d'ensembl_id
+					continue
+
 	return ensemblD
 
 
@@ -161,10 +151,10 @@ def omim_parser(ensemblD, omim_f):
 		for line in omim:
 			line = line.strip('\n')
 			if not line.startswith("#"):
-				mimNumber, geneSymbol, entrez_id, ensembl_id, phenotypeString = "", "", "", "", "" 
+				mimNumber, gene_symbol, entrez_id, ensembl_id, phenotypeString = "", "", "", "", "" 
 				items = line.split('\t')
 				mimNumber = items[5]
-				geneSymbol = items[8]
+				gene_symbol = items[8]
 				entrez_id = items[9]
 				ensembl_id = items[10]
 				phenotypeString = items[12]
@@ -175,7 +165,7 @@ def omim_parser(ensemblD, omim_f):
 				for phenotype in phenotypeString.split(';'):
 					phenotype = phenotype.strip()
 					inherit = ''
-					# print(">>> ",geneSymbol, phenotype)
+					# print(">>> ",gene_symbol, phenotype)
 					# Long phenotype
 					matcher = re.match(r'^(.*),\s(\d{6})\s\((\d)\)(|, (.*))$', phenotype)
 					if matcher:
@@ -249,10 +239,10 @@ def omim_parser(ensemblD, omim_f):
 							ensemblD[ensembl_id]['omim_disease'] = omim
 							ensemblD[ensembl_id]['omim_inheritance'] = inherit
 							ensemblD[ensembl_id]['entrez_id'] = entrez_id
-							ensemblD[ensembl_id]['geneSymbol'] = geneSymbol
+							ensemblD[ensembl_id]['gene_symbol'] = gene_symbol
 						else:
-							if ensemblD[ensembl_id]['geneSymbol'] == '':
-								ensemblD[ensembl_id]['geneSymbol'] = geneSymbol
+							if ensemblD[ensembl_id]['gene_symbol'] == '':
+								ensemblD[ensembl_id]['gene_symbol'] = gene_symbol
 							if ensemblD[ensembl_id]['entrez_id'] == '':
 								ensemblD[ensembl_id]['entrez_id'] = entrez_id
 							if ensemblD[ensembl_id]['omim_geneID'] == '':
@@ -272,21 +262,21 @@ def clinvar_parser(ensemblD, clinvar_f):
 		for line in clinvar:
 			line = line.strip('\n')
 			if not line.startswith("#GeneID"):
-				entrez_id, geneSymbol, disease = "", "", ""
+				entrez_id, gene_symbol, disease = "", "", ""
 				items = line.split("\t")
 				entrez_id = items[0]
-				geneSymbol = items[1]
+				gene_symbol = items[1]
 				if curr_id == '00000':
 					curr_id = entrez_id
 				if curr_gene == '00000':
-					curr_gene = geneSymbol
+					curr_gene = gene_symbol
 				disease = items[4].replace(';','')
 				omim_id = items[7]
 				if omim_id != '':
 					clinvar = disease + " OMIM:" + omim_id
 				else:
 					clinvar = disease
-				# print(geneSymbol, entrez_id, clinvar)
+				# print(gene_symbol, entrez_id, clinvar)
 
 				if entrez_id != curr_id:
 					# print(">>> DIFFERENT GENE, write")
@@ -302,7 +292,7 @@ def clinvar_parser(ensemblD, clinvar_f):
 					# print("<<< new gene and reset clinvar_l")
 					clinvar_l = []
 					curr_id = entrez_id
-					curr_gene = geneSymbol
+					curr_gene = gene_symbol
 					clinvar_l.append(clinvar)
 				else:
 					if clinvar not in clinvar_l:
@@ -319,18 +309,18 @@ def hpo_parser(ensemblD, hpo_f):
 		for line in hpo:
 			line = line.strip('\n')
 			if not line.startswith("#Format:"):
-				entrez_id, geneSymbol, hpo_id, hpo_name, = "", "", "", ""
+				entrez_id, gene_symbol, hpo_id, hpo_name, = "", "", "", ""
 				items = line.split("\t")
 				entrez_id = items[0]
-				geneSymbol = items[1]
+				gene_symbol = items[1]
 				if curr_id == '00000':
 					curr_id = entrez_id
 				if curr_gene == '00000':
-					curr_gene = geneSymbol
+					curr_gene = gene_symbol
 				hpo_id = items[2]
 				hpo_name = items[3]
 				hpo = hpo_name + " " + hpo_id
-				# print(geneSymbol, entrez_id, hpo)
+				# print(gene_symbol, entrez_id, hpo)
 
 				if entrez_id != curr_id:
 					# print(">>> DIFFERENT GENE, write")
@@ -346,7 +336,7 @@ def hpo_parser(ensemblD, hpo_f):
 					# print("<<< new gene and reset hpo_l")
 					hpo_l = []
 					curr_id = entrez_id
-					curr_gene = geneSymbol
+					curr_gene = gene_symbol
 					hpo_l.append(hpo)
 				else:
 					if hpo not in hpo_l:
@@ -360,8 +350,8 @@ def loeuf_parser(ensemblD, loeuf_f):
 		for line in loeuf:
 			line = line.decode("utf-8").strip("\n")
 			if not line.startswith("#gene\ttranscript"):
-				geneSymbol, ensembl_id, loeuf_score = "", "", ""
-				geneSymbol = line.split("\t")[0]
+				gene_symbol, ensembl_id, loeuf_score = "", "", ""
+				gene_symbol = line.split("\t")[0]
 				loeuf_score = line.split("\t")[30] # oe_lof_upper
 				ensembl_id = line.split("\t")[64]
 
@@ -375,10 +365,10 @@ def loeuf_parser(ensemblD, loeuf_f):
 				if ensembl_id not in ensemblD:
 					ensemblD[ensembl_id] = {}
 					ensemblD[ensembl_id]['loeuf'] = loeuf_score
-					ensemblD[ensembl_id]['geneSymbol'] = geneSymbol
+					ensemblD[ensembl_id]['gene_symbol'] = gene_symbol
 				else:
-					if ensemblD[ensembl_id]['geneSymbol'] == '':
-						ensemblD[ensembl_id]['geneSymbol'] = geneSymbol
+					if ensemblD[ensembl_id]['gene_symbol'] == '':
+						ensemblD[ensembl_id]['gene_symbol'] = gene_symbol
 					if ensemblD[ensembl_id]['loeuf'] == '':
 						ensemblD[ensembl_id]['loeuf'] = loeuf_score
 	return ensemblD
@@ -388,14 +378,16 @@ def complete_missing_keys(ensemblD):
 	for i in ensemblD:
 		if "hgnc_id" not in ensemblD[i]:
 			ensemblD[i]['hgnc_id'] = ""
-		if "geneSymbol" not in ensemblD[i]:
-			ensemblD[i]['geneSymbol'] = ""
+		if "gene_symbol" not in ensemblD[i]:
+			ensemblD[i]['gene_symbol'] = ""
 		if "entrez_id" not in ensemblD[i]:
 			ensemblD[i]['entrez_id'] = ""
 		if "omim_geneID" not in ensemblD[i]:
 			ensemblD[i]['omim_geneID'] = ""
-		if "panelapp" not in ensemblD[i]:
-			ensemblD[i]['panelapp'] = ""
+		if "panelapp_aus" not in ensemblD[i]:
+			ensemblD[i]['panelapp_aus'] = ""
+		if "panelapp_eng" not in ensemblD[i]:
+			ensemblD[i]['panelapp_eng'] = ""
 		if "omim_disease" not in ensemblD[i]:
 			ensemblD[i]['omim_disease'] = ""
 		if "omim_inheritance" not in ensemblD[i]:
@@ -425,7 +417,7 @@ def genes_coord(gencodeGene_f_fn):
 				end = line.split('\t')[2]
 				info = line.split('\t')[3]
 				geneID = info.split(';')[0]
-				geneSymbol = info.split(';')[1]
+				gene_symbol = info.split(';')[1]
 				genesD_fn[geneID] = chrom + ":" + start_0b + "-" + end
 	return genesD_fn 
 
@@ -462,13 +454,15 @@ def get_annotation_smoove(fraser2_df, ensemblD_fn, genesD_fn):
 			for i in range(0, len(fraser2_df[k]['geneID_l'])): # for each gene
 				panelapp, hpo, clinvar, omim_inh, omim_dis, loeuf = '', '', '', '', '', ''
 				if fraser2_df[k]['geneID_l'][i] in ensemblD_fn:
-					panelapp = ensemblD_fn[fraser2_df[k]['geneID_l'][i]]['panelapp']
+					panelapp_aus = ensemblD_fn[cnvD_fn['geneID_l'][i]]['panelapp_aus']
+					panelapp_eng = ensemblD_fn[cnvD_fn['geneID_l'][i]]['panelapp_eng']
 					hpo = ensemblD_fn[fraser2_df[k]['geneID_l'][i]]['hpo']
 					clinvar = ensemblD_fn[fraser2_df[k]['geneID_l'][i]]['clinvar']
 					omim_dis = ensemblD_fn[fraser2_df[k]['geneID_l'][i]]['omim_disease']
 					omim_inh = ensemblD_fn[fraser2_df[k]['geneID_l'][i]]['omim_inheritance']
 					loeuf = ensemblD_fn[fraser2_df[k]['geneID_l'][i]]['loeuf']
-				fraser2_df[k]['panelapp_l'].append(panelapp)
+				fraser2_df[k]['panelapp_eng_l'].append(panelapp_eng)
+				fraser2_df[k]['panelapp_aus_l'].append(panelapp_aus)
 				fraser2_df[k]['hpo_l'].append(hpo)
 				fraser2_df[k]['clinvar_l'].append(clinvar)
 				fraser2_df[k]['omim_dis_l'].append(omim_dis)
@@ -534,7 +528,7 @@ def smooveAnnot(fraser2_df):
 			end = line.split('\t')[8]
 			info = line.split('\t')[3]
 			geneID = info.split(';')[0]
-			geneSymbol = info.split(';')[1]
+			gene_symbol = info.split(';')[1]
 			feature = info.split(';')[2]
 			strand = line.split('\t')[8]
 			key_0b = chrom + ":" + start_0b + "-" + end # 0-based
@@ -545,12 +539,12 @@ def smooveAnnot(fraser2_df):
 				else:
 					if geneID not in fraser2_df[key_0b]['geneID_l']:
 						fraser2_df[key_0b]['geneID_l'].append(geneID)
-				if 'geneSymbol_l' not in fraser2_df[key_0b]:
-					fraser2_df[key_0b]['geneSymbol_l'] = []
-					fraser2_df[key_0b]['geneSymbol_l'].append(geneSymbol)
+				if 'gene_symbol_l' not in fraser2_df[key_0b]:
+					fraser2_df[key_0b]['gene_symbol_l'] = []
+					fraser2_df[key_0b]['gene_symbol_l'].append(gene_symbol)
 				else:
-					if geneSymbol not in fraser2_df[key_0b]['geneSymbol_l']:
-						fraser2_df[key_0b]['geneSymbol_l'].append(geneSymbol)
+					if gene_symbol not in fraser2_df[key_0b]['gene_symbol_l']:
+						fraser2_df[key_0b]['gene_symbol_l'].append(gene_symbol)
 				if 'feature_l' not in fraser2_df[key_0b]:
 					fraser2_df[key_0b]['feature_l'] = []
 					fraser2_df[key_0b]['feature_l'].append(feature)
@@ -583,8 +577,12 @@ ensemblD = {}
 ensemblD = hgnc_parser(ensemblD, hgnc_f)
 ensemblD = complete_missing_keys(ensemblD)
 
-print("	> PANELAPP...")
-ensemblD = panelapp_parser(ensemblD, panelapp_f)
+print("	> PANELAPP ENGLAND...")
+ensemblD = panelapp_parser(ensemblD, panelapp_eng_f)
+ensemblD = complete_missing_keys(ensemblD)
+
+print("	> PANELAPP AUSTRALIA...")
+ensemblD = panelapp_parser(ensemblD, panelapp_aus_f)
 ensemblD = complete_missing_keys(ensemblD)
 
 print("	> OMIM...")
@@ -614,6 +612,7 @@ df_ensembl = df_ensembl.rename(columns={'index': 'ensg'})
 # print(df_ensembl.columns.values.tolist())
 df_ensembl.to_csv('./Fichiers_annotes/ensembl.csv', sep='\t', index=False)
 
+
 ###
 print("\n> FRASER2 VCF TO BED...")
 smooveD = smooveVCF2BED()
@@ -631,7 +630,7 @@ smooveD['coord'] = smooveD['seqnames'].astype(str) + ':' + smooveD['start'].asty
 
 df_db = df_ensembl.merge(df_genes, left_on='ensg', right_on='ensg', suffixes=('_ensembl', '_genes'), how='outer')
 df_db.to_csv('./Fichiers_annotes/db.csv', sep='\t', index=False)
-df_final = smooveD.merge(df_db, left_on='hgncSymbol', right_on='geneSymbol', suffixes=('_fraser2', '_db'), how='left')
+df_final = smooveD.merge(df_db, left_on='hgncSymbol', right_on='gene_symbol', suffixes=('_fraser2', '_db'), how='left')
 
 
 ## EXCEL ##
@@ -645,12 +644,14 @@ df_final.sort_values(['pValue'], ascending=True, inplace=True)
 del df_final['coord_db']
 del df_final['distNearestGene']
 
+
 # ordonner les colonnes
-cols = ['sampleID', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'hgncSymbol', 'geneSymbol', 'ensg', 
-	   'pValue', 'psiValue', 'deltaPsi', 'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 'hgnc_id', 
-	   'entrez_id', 'omim_geneID', 'panelapp', 'omim_disease', 'omim_inheritance', 'hpo', 'clinvar', 'loeuf', 'UTR_overlap', 
-	   'counts', 'totalCounts', 'meanCounts', 'meanTotalCounts', 'nonsplitCounts', 'nonsplitProportion', 'nonsplitProportion_99quantile', 
-	   'blacklist']
+cols = ['sampleID', 'panelapp', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'psiValue', 'deltaPsi', 'hpo',
+ 'clinvar', 'loeuf', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'geneSymbol', 'ensg', 'omim_geneID', 
+ 'hgnc_id', 'entrez_id', 'UTR_overlap', 'blacklist'  'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 
+ 'counts', 'totalCounts', 'meanCounts', 'meanTotalCounts', 'nonsplitCounts', 'nonsplitProportion', 'nonsplitProportion_99quantile']
+
+
 df_final = df_final.reindex(cols, axis=1)
 
 
@@ -662,21 +663,34 @@ df_final.to_excel(writer,sheet_name = "FRASER2", index=False)
 workbook  = writer.book
 worksheet = writer.sheets['FRASER2']
 greenFormat  = workbook.add_format({'bg_color': 'lime'})
-worksheet.conditional_format('U2:B5000', {'type': 'text',
+worksheet.conditional_format('O2:O5000', {'type': 'text',
                                        'criteria': 'containing',
-                                       'value': '(G)',
+                                       'value': 'Lvl3',
                                        'format': greenFormat})
 redFormat  = workbook.add_format({'bg_color': 'red'})
-worksheet.conditional_format('U2:B5000', {'type': 'text',
+worksheet.conditional_format('O2:O5000', {'type': 'text',
                                        'criteria': 'containing',
-                                       'value': '(R)',
+                                       'value': 'Lvl2',
                                        'format': redFormat})
 yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
-worksheet.conditional_format('U2:B5000', {'type': 'text',
+worksheet.conditional_format('O2:O5000', {'type': 'text',
                                        'criteria': 'containing',
-                                       'value': '(A)',
+                                       'value': 'Lvl1',
                                        'format': yellowFormat})
-
+worksheet.conditional_format('N2:N5000', {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl3',
+                                       'format': greenFormat})
+redFormat  = workbook.add_format({'bg_color': 'red'})
+worksheet.conditional_format('N2:N5000', {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl2',
+                                       'format': redFormat})
+yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
+worksheet.conditional_format('N2:N5000', {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl1',
+                                       'format': yellowFormat})
 writer.save() 
 
 
