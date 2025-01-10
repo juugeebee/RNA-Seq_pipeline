@@ -646,8 +646,8 @@ del df_final['distNearestGene']
 
 
 # ordonner les colonnes
-cols = ['sampleID', 'panelapp', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'psiValue', 'deltaPsi', 'hpo',
- 'clinvar', 'loeuf', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'geneSymbol', 'ensg', 'omim_geneID', 
+cols = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'psiValue', 'deltaPsi', 'hpo',
+ 'clinvar', 'loeuf', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'gene_symbol', 'ensg', 'omim_geneID', 
  'hgnc_id', 'entrez_id', 'UTR_overlap', 'blacklist'  'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 
  'counts', 'totalCounts', 'meanCounts', 'meanTotalCounts', 'nonsplitCounts', 'nonsplitProportion', 'nonsplitProportion_99quantile']
 
@@ -663,31 +663,31 @@ df_final.to_excel(writer,sheet_name = "FRASER2", index=False)
 workbook  = writer.book
 worksheet = writer.sheets['FRASER2']
 greenFormat  = workbook.add_format({'bg_color': 'lime'})
-worksheet.conditional_format('O2:O5000', {'type': 'text',
+worksheet.conditional_format('B2:B5000', {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl3',
                                        'format': greenFormat})
 redFormat  = workbook.add_format({'bg_color': 'red'})
-worksheet.conditional_format('O2:O5000', {'type': 'text',
+worksheet.conditional_format('B2:B5000', {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl2',
                                        'format': redFormat})
 yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
-worksheet.conditional_format('O2:O5000', {'type': 'text',
+worksheet.conditional_format('B2:B5000', {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl1',
                                        'format': yellowFormat})
-worksheet.conditional_format('N2:N5000', {'type': 'text',
+worksheet.conditional_format('C2:C5000', {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl3',
                                        'format': greenFormat})
 redFormat  = workbook.add_format({'bg_color': 'red'})
-worksheet.conditional_format('N2:N5000', {'type': 'text',
+worksheet.conditional_format('C2:C5000', {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl2',
                                        'format': redFormat})
 yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
-worksheet.conditional_format('N2:N5000', {'type': 'text',
+worksheet.conditional_format('C2:C5000', {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl1',
                                        'format': yellowFormat})
