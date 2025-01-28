@@ -14,7 +14,7 @@ gencodeBasic = '/media/jbogoin/Data1/Annotations_RNA-Seq/gencode.v47.chr_patch_h
 
 
 subprocess.call("zcat " + gencodeBasic + " | awk '{if ($3==\"CDS\" || $3==\"three_prime_UTR\" || $3==\"five_prime_UTR\") print $0}' \
-    | grep \"gene_type=protein_coding;\" > gencode.basic.CDS.UTR.prot_coding.gff3", shell="/bin/bash")
+| grep \"gene_type=protein_coding;\" > gencode.basic.CDS.UTR.prot_coding.gff3", shell="/bin/bash")
 
 subprocess.call("zcat " + gencodeBasic + " | awk '{if ($3==\"gene\") print $0}' | grep \"gene_type=protein_coding;\" \
     > gencode.basic.gene.prot_coding.gff3", shell="/bin/bash")

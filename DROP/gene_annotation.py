@@ -14,12 +14,6 @@ pp = pprint.PrettyPrinter(indent=4)
 print('\n***GENE ANNOTATIONS***\n ')
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-o", help="overlap limit", type=float, required=True)
-args = parser.parse_args()
-overlapLimit = args.o
-
-
 hgnc_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/HGNC/1mar2024/hgnc.tsv"
 panelapp_eng_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/20nov2024/panelapp_england.tsv"
 panelapp_aus_f = '/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/20nov2024/panelapp_australia.tsv'
@@ -31,6 +25,7 @@ gencodeGene_f = "./Fichiers_annotes/gencode.basic.gene.prot_coding.bed"
 
 
 fraser2_f = './drop/output/processed_results/aberrant_splicing/results/v43/fraser/fraser2/results.tsv'
+outrider_f = './drop/output/processed_results/aberrant_expression/v43/outrider/outrider/OUTRIDER_results.tsv'
 
 
 def tabix_query(file_fn, chrom_fn, start_fn, end_fn):
@@ -376,26 +371,26 @@ def loeuf_parser(ensemblD, loeuf_f):
 
 def complete_missing_keys(ensemblD):
 	for i in ensemblD:
-		if "hgnc_id" not in ensemblD[i]:
-			ensemblD[i]['hgnc_id'] = ""
 		if "gene_symbol" not in ensemblD[i]:
 			ensemblD[i]['gene_symbol'] = ""
+		if "hgnc_id" not in ensemblD[i]:
+			ensemblD[i]['hgnc_id'] = ""
 		if "entrez_id" not in ensemblD[i]:
 			ensemblD[i]['entrez_id'] = ""
-		if "omim_geneID" not in ensemblD[i]:
-			ensemblD[i]['omim_geneID'] = ""
 		if "panelapp_aus" not in ensemblD[i]:
 			ensemblD[i]['panelapp_aus'] = ""
 		if "panelapp_eng" not in ensemblD[i]:
-			ensemblD[i]['panelapp_eng'] = ""
+			ensemblD[i]['panelapp_eng'] = ""		
+		if "omim_geneID" not in ensemblD[i]:
+			ensemblD[i]['omim_geneID'] = ""		
 		if "omim_disease" not in ensemblD[i]:
 			ensemblD[i]['omim_disease'] = ""
 		if "omim_inheritance" not in ensemblD[i]:
 			ensemblD[i]['omim_inheritance'] = ""
-		if "hpo" not in ensemblD[i]:
-			ensemblD[i]['hpo'] = ""
 		if "clinvar" not in ensemblD[i]:
 			ensemblD[i]['clinvar'] = ""
+		if "hpo" not in ensemblD[i]:
+			ensemblD[i]['hpo'] = ""
 		if "loeuf" not in ensemblD[i]:
 			ensemblD[i]['loeuf'] = ""
 	return ensemblD
@@ -422,7 +417,7 @@ def genes_coord(gencodeGene_f_fn):
 	return genesD_fn 
 
 
-def get_annotation_smoove(fraser2_df, ensemblD_fn, genesD_fn):	
+def get_annotation_fraser2(fraser2_df, ensemblD_fn, genesD_fn):	
 	for k in fraser2_df:
 		if k.startswith('chr'):
 			if "CDS" in fraser2_df[k]['feature_l']:
@@ -471,8 +466,7 @@ def get_annotation_smoove(fraser2_df, ensemblD_fn, genesD_fn):
 	return fraser2_df
 
 
-def smooveVCF2BED():
-
+def fraser2TSV2BED():
 	# importer le fichier brut
 	fraser2_df = pandas.read_csv(fraser2_f, header=[0], sep='\t')
 
@@ -480,6 +474,12 @@ def smooveVCF2BED():
 	fraser2_df.drop(fraser2_df[fraser2_df['sampleID'] == 'Undetermined'].index, inplace = True)
 
 	# Supprimer les patients _ref
+	ik = fraser2_df[fraser2_df["sampleID"].str.contains("_ref") == True]
+	print('Nombres de temoins Fraser2:')
+	lik =ik['sampleID'].unique()
+	print(len(lik))
+	ik['sampleID'].to_csv('./Fichiers_annotes/temoins_fraser2.csv', header=False, index=False, sep='\t')
+
 	indexNames_ref = fraser2_df[fraser2_df["sampleID"].str.contains("_ref") == True].index
 	fraser2_df.drop(indexNames_ref, inplace=True)
 
@@ -494,11 +494,13 @@ def smooveVCF2BED():
 	# Supprimer les colonnes inutiles
 	del fraser2_df['padjustGene']
 	del fraser2_df['pValueGene']
-	del fraser2_df['PAIRED_END']
-	del fraser2_df['DROP_GROUP']
-	del fraser2_df['INDIVIDAL_ID']
-	del fraser2_df['DNA_ID']
-	del fraser2_df['isExternal']
+	###
+	# del fraser2_df['PAIRED_END']
+	# del fraser2_df['DROP_GROUP']
+	# del fraser2_df['INDIVIDAL_ID']
+	# del fraser2_df['DNA_ID']
+	# del fraser2_df['isExternal']
+	###
 
 	# trier le df
 	fraser2_df.sort_values(['sampleID','seqnames', 'start'], ascending=True, inplace=True)
@@ -519,7 +521,52 @@ def smooveVCF2BED():
 	return fraser2_df
 
 
-def smooveAnnot(fraser2_df):
+def outriderTSV2DF():
+	# importer le fichier brut
+	outrider_df = pandas.read_csv(outrider_f, header=[0], sep='\t')
+
+	# supprimer tous les Undetermined
+	outrider_df.drop(outrider_df[outrider_df['sampleID'] == 'Undetermined'].index, inplace = True)
+
+	# Supprimer les patients _ref
+	ik = outrider_df[outrider_df["sampleID"].str.contains("_ref") == True]
+	print('Nombres de temoins Outrider:')
+	lik =ik['sampleID'].unique()
+	print(len(lik))
+	ik['sampleID'].to_csv('./Fichiers_annotes/temoins_outrider.csv', header=False, index=False, sep='\t')
+
+	indexNames_ref = outrider_df[outrider_df["sampleID"].str.contains("_ref") == True].index
+	outrider_df.drop(indexNames_ref, inplace=True)
+
+	# Supprimer les hgncSymbol HLA
+	indexNames_hla = outrider_df[outrider_df["hgncSymbol"].str.contains("HLA") == True].index
+	outrider_df.drop(indexNames_hla, inplace=True)
+
+	# Supprimer les lignes avec une pValue à 1
+	indexNames_pv = outrider_df[outrider_df["pValue"] == 1].index
+	outrider_df.drop(indexNames_pv, inplace=True)
+
+	# Supprimer les colonnes inutiles
+	del outrider_df['padjust']
+	del outrider_df['padj_rank']
+	del outrider_df['aberrant']
+	del outrider_df['AberrantBySample']
+	del outrider_df['AberrantByGene']
+	###
+	# del outrider_df['FDR_set']
+	###
+
+	# Supprimer le . du nom ENSG danas la colonne geneID
+	ensg_df = outrider_df['geneID'].str.split(pat='.', n=0, expand=True, regex=None)
+	outrider_df['ensg'] = ensg_df[0]
+	del outrider_df['geneID']
+
+	# trier le df
+	outrider_df.sort_values(['sampleID'], ascending=True, inplace=True)
+	return outrider_df
+
+
+def fraser2Annot(fraser2_df):
 	with open('./Fichiers_annotes/fraser2_bedtools.bed','r') as bedtoolsSmoove:
 		for line in bedtoolsSmoove:
 			line = line.rstrip('\n')
@@ -552,7 +599,7 @@ def smooveAnnot(fraser2_df):
 					if feature not in fraser2_df[key_0b]['feature_l']:
 						fraser2_df[key_0b]['feature_l'].append(feature)
 
-	fraser2_df = get_annotation_smoove(fraser2_df, ensemblD, genesD)
+	fraser2_df = get_annotation_fraser2(fraser2_df, ensemblD, genesD)
 	return fraser2_df
 
 
@@ -605,7 +652,6 @@ if '' in ensemblD:
     del ensemblD['']
 
 
-
 df_ensembl = pandas.DataFrame.from_dict(ensemblD, orient='index')
 df_ensembl.reset_index(inplace=True)
 df_ensembl = df_ensembl.rename(columns={'index': 'ensg'})
@@ -613,85 +659,142 @@ df_ensembl = df_ensembl.rename(columns={'index': 'ensg'})
 df_ensembl.to_csv('./Fichiers_annotes/ensembl.csv', sep='\t', index=False)
 
 
-###
-print("\n> FRASER2 VCF TO BED...")
-smooveD = smooveVCF2BED()
+#### FRASER2 ####
+print("\n> FRASER2 TSV TO DF...")
+fraser2D = fraser2TSV2BED()
 
 print("> FRASER2 Annotation...")
-smooveD = smooveAnnot(smooveD)
+fraser2D = fraser2Annot(fraser2D)
 
-smooveD['coord'] = smooveD['seqnames'].astype(str) + ':' + smooveD['start'].astype(str) + '-' + smooveD['end'].astype(str)
-# print(smooveD.columns.values.tolist())
-###
+fraser2D['coord'] = fraser2D['seqnames'].astype(str) + ':' + fraser2D['start'].astype(str) + '-' + fraser2D['end'].astype(str)
+# print(fraser2D.columns.values.tolist())
+
+
+#### OUTRIDER ####
+print("\n> OUTRIDER TSV TO DF...")
+outriderD = outriderTSV2DF()
+
+print("> OUTRIDER Annotation...")
 
 
 ## MERGE ##
-
-
 df_db = df_ensembl.merge(df_genes, left_on='ensg', right_on='ensg', suffixes=('_ensembl', '_genes'), how='outer')
 df_db.to_csv('./Fichiers_annotes/db.csv', sep='\t', index=False)
-df_final = smooveD.merge(df_db, left_on='hgncSymbol', right_on='gene_symbol', suffixes=('_fraser2', '_db'), how='left')
+
+df_final_fraser2 = fraser2D.merge(df_db, left_on='hgncSymbol', right_on='gene_symbol', suffixes=('_fraser2', '_db'), how='left')
+df_final_outrider = outriderD.merge(df_db, left_on='ensg', right_on='ensg', suffixes=('_fraser2', '_db'), how='left')
 
 
 ## EXCEL ##
-
 path = os.getcwd()
 path_l = path.split('/')
 run_name = path_l[-1]
 
-# trier le df_final
-df_final.sort_values(['pValue'], ascending=True, inplace=True)
-del df_final['coord_db']
-del df_final['distNearestGene']
+
+# trier le df_final_fraser2
+df_final_fraser2.sort_values(['pValue'], ascending=True, inplace=True)
+del df_final_fraser2['coord_db']
+del df_final_fraser2['distNearestGene']
 
 
-# ordonner les colonnes
-cols = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'psiValue', 'deltaPsi', 'hpo',
+# trier le df_final_outrider
+df_final_outrider.sort_values(['pValue'], ascending=True, inplace=True)
+
+
+# ordonner les colonnes fraser2
+cols_fraser2 = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'psiValue', 'deltaPsi', 'hpo',
  'clinvar', 'loeuf', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'gene_symbol', 'ensg', 'omim_geneID', 
- 'hgnc_id', 'entrez_id', 'UTR_overlap', 'blacklist'  'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 
+ 'hgnc_id', 'entrez_id', 'UTR_overlap', 'blacklist', 'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 
  'counts', 'totalCounts', 'meanCounts', 'meanTotalCounts', 'nonsplitCounts', 'nonsplitProportion', 'nonsplitProportion_99quantile']
+df_final_fraser2 = df_final_fraser2.reindex(cols_fraser2, axis=1)
 
 
-df_final = df_final.reindex(cols, axis=1)
+# ordonner les colonnes outrider
+cols_outrider = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'zScore', 'hpo',
+ 'clinvar', 'loeuf', 'coord', 'gene_symbol', 'ensg', 'omim_geneID', 'hgnc_id', 'entrez_id', 
+ 'l2fc', 'rawcounts', 'normcounts', 'meanCorrected', 'theta', 'foldChange']
+df_final_outrider = df_final_outrider.reindex(cols_outrider, axis=1)
 
 
+## FICHIER FINAL FRASER2 ##
 writer = pandas.ExcelWriter('./Fichiers_annotes/FRASER2_' + run_name + '_annote.xlsx', engine='xlsxwriter')
+df_final_fraser2.to_excel(writer,sheet_name = "FRASER2", index=False)
 
-df_final.to_excel(writer,sheet_name = "FRASER2", index=False)
 
 #coloration panelapp
+longueur = len(df_final_outrider)
+
 workbook  = writer.book
 worksheet = writer.sheets['FRASER2']
 greenFormat  = workbook.add_format({'bg_color': 'lime'})
-worksheet.conditional_format('B2:B5000', {'type': 'text',
+worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl3',
                                        'format': greenFormat})
 redFormat  = workbook.add_format({'bg_color': 'red'})
-worksheet.conditional_format('B2:B5000', {'type': 'text',
+worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl2',
                                        'format': redFormat})
 yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
-worksheet.conditional_format('B2:B5000', {'type': 'text',
+worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl1',
                                        'format': yellowFormat})
-worksheet.conditional_format('C2:C5000', {'type': 'text',
+worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl3',
                                        'format': greenFormat})
 redFormat  = workbook.add_format({'bg_color': 'red'})
-worksheet.conditional_format('C2:C5000', {'type': 'text',
+worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl2',
                                        'format': redFormat})
 yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
-worksheet.conditional_format('C2:C5000', {'type': 'text',
+worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl1',
                                        'format': yellowFormat})
 writer.save() 
+
+
+## FICHIER FINAL OUTRIDER ##
+writer2 = pandas.ExcelWriter('./Fichiers_annotes/OUTRIDER_' + run_name + '_annote.xlsx', engine='xlsxwriter')
+df_final_outrider.to_excel(writer2,sheet_name = "OUTRIDER", index=False)
+
+#coloration panelapp
+workbook2  = writer2.book
+worksheet2 = writer2.sheets['OUTRIDER']
+greenFormat2  = workbook2.add_format({'bg_color': 'lime'})
+worksheet2.conditional_format('B2:B'+str(longueur), {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl3',
+                                       'format': greenFormat2})
+redFormat2  = workbook2.add_format({'bg_color': 'red'})
+worksheet2.conditional_format('B2:B'+str(longueur), {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl2',
+                                       'format': redFormat2})
+yellowFormat2  = workbook2.add_format({'bg_color': 'yellow'})
+worksheet2.conditional_format('B2:B'+str(longueur), {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl1',
+                                       'format': yellowFormat2})
+worksheet2.conditional_format('C2:C'+str(longueur), {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl3',
+                                       'format': greenFormat2})
+redFormat2  = workbook2.add_format({'bg_color': 'red'})
+worksheet2.conditional_format('C2:C'+str(longueur), {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl2',
+                                       'format': redFormat2})
+yellowFormat2  = workbook2.add_format({'bg_color': 'yellow'})
+worksheet2.conditional_format('C2:C'+str(longueur), {'type': 'text',
+                                       'criteria': 'containing',
+                                       'value': 'Lvl1',
+                                       'format': yellowFormat2})
+writer2.save() 
 
 
 print('\n***GENE ANNOTATIONS DONE !***\n ')
