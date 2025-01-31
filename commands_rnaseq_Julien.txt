@@ -1,0 +1,41 @@
+### DOWNLOAD GENCODE FILES (& unzip) ###
+
+GRCh38.primary_assembly.genome.fa
+gencode.v46.primary_assembly.annotation.gtf
+gencode.v46.transcripts.fa
+
+### PREPARE FILES ###
+
+gatk CreateSequenceDictionary -R GRCh38.primary_assembly.genome.fa
+grep "gene_type \"rRNA" gencode.v46.primary_assembly.annotation.gtf | grep -v "^GL000" | grep -v "^KI27" | awk -F "\t" '{print $1"\t"$4-1"\t"$5}' | sort -Vu > gencode.v46.rRNA.bed
+gatk BedToIntervalList -I gencode.v46.rRNA.bed -SD GRCh38.primary_assembly.genome.dict -O gencode.v46.rRNA.intervalList
+Download https://github.com/broadinstitute/gtex-pipeline/blob/master/gene_model/collapse_annotation.py
+python3 collapse_annotation.py gencode.v46.primary_assembly.annotation.gtf gencode.v46.genes.gtf
+
+### SALMON ###
+
+grep "^>" GRCh38.primary_assembly.genome.fa | cut -d " " -f 1 > decoys.txt
+sed -i.bak -e 's/>//g' decoys.txt
+cat gencode.v46.transcripts.fa GRCh38.primary_assembly.genome.fa > gentrome.fa
+salmon index -t gentrome.fa -d decoys.txt -p 12 -i salmon_index --gencode -k 31
+
+salmon quant -i transcripts_index -l <LIBTYPE> -1 reads1.fq -2 reads2.fq --validateMappings -o transcripts_quant
+
+### STAR + INDEX + SALMON ###
+
+for R1 in *_R1_*.fastq.gz; do R2=${R1/_R1_/_R2_}; SAMPLE=${R1%%_*}; FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; STAR --runThreadN 36 --genomeDir /media/jburatti/HDD_12To_2/RNA-seq/STAR_files/hg38_jul2024/Overhang100 --outSAMtype BAM SortedByCoordinate --readFilesCommand zcat --readFilesIn $R1 $R2 --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:Il-str-mRNA-D SM:${SAMPLE} --outFileNamePrefix ${SAMPLE} --twopassMode Basic && samtools index -@ 8 ${SAMPLE}Aligned.sortedByCoord.out.bam && salmon quant -i /media/jburatti/HDD_12To_2/RNA-seq/STAR_files/hg38_jul2024/salmon_index -l ISR -1 $R1 -2 $R2 --validateMappings -o ${SAMPLE}_Salmon; done
+
+### FASTQC + RNASEQC + CollectRnaSeqMetrics + MultiQC ###
+
+time parallel -j 8 fastqc {} ::: *.fastq.gz && for i in *Aligned.sortedByCoord.out.bam; do sample=${i/Aligned.sortedByCoord.out.bam/}; rnaseqc /media/jburatti/HDD_12To_2/RNA-seq/STAR_files/hg38_jul2024/gencode.v46.genes.gtf $i ${sample}_RNA-SeQC --sample=${sample} --stranded=rf; done && for i in *Aligned.sortedByCoord.out.bam; do sample=${i%Aligned.sortedByCoord.out.bam}; gatk CollectRnaSeqMetrics -I $i -O ${sample}.RnaSeqMetrics.txt --REF_FLAT /media/jburatti/HDD_12To_2/RNA-seq/STAR_files/hg38_jul2024/refFlat_hg38.txt -R /media/jburatti/HDD_12To_2/RNA-seq/STAR_files/hg38_jan2023/GRCh38.primary_assembly.genome.fa -STRAND SECOND_READ_TRANSCRIPTION_STRAND --RIBOSOMAL_INTERVALS /media/jburatti/HDD_12To_2/RNA-seq/STAR_files/hg38_jul2024/gencode.v46.rRNA.intervalList; done && multiqc .
+
+### FASTP (NON) ###
+
+fastp -i 6622CY000890_S1_R1_001.fastq.gz -I 6622CY000890_S1_R2_001.fastq.gz -o 6622CY000890_S1_R1_001.fastp.fastq.gz -O 6622CY000890_S1_R2_001.fastp.fastq.gz -h 6622CY000890_fastp.html -j 6622CY000890_fastp.json -w 12
+
+### rMATS ###
+
+python rmats.py --b1 RNU4-2_bams.txt --b2 rmats_control_bams.txt --gtf /media/jburatti/HDD_12To_2/RNA-seq/STAR_files/hg38_jul2024/gencode.v46.primary_assembly.annotation.gtf -t paired --anchorLength 1 --libType fr-firststrand --task both --novelSS --readLength 97 --variable-read-length --allow-clipping --nthread 16 --od rmats_final_output --tmp tmp
+
+### DROP ###
+

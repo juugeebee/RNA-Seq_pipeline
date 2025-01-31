@@ -25,9 +25,13 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
 #NG
-target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
-target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
+# target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
+# target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
 
+
+#OA
+target='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.bed'
+target_il='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.interval_list'
 
 #***********************************************************************
 #echo "FastQC"
@@ -340,10 +344,10 @@ cd ..
 
 
 #***********************************************************************#
-echo "DROP"
-echo ""
+# echo "DROP"
+# echo ""
 
-bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
+# bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
 
 
 echo ""

@@ -52,6 +52,7 @@ conda deactivate
 
 echo ""
 echo "Annotations des fichiers"
+cd ..
 python ~/SCRIPTS/RNA-Seq/DROP/prepare_annotation.py
 python ~/SCRIPTS/RNA-Seq/DROP/gene_annotation.py
 
