@@ -11,28 +11,27 @@ echo ""
 ## A LANCER DANS LE DOSSIER RACINE DU RUN
 #########################################
 
+genome_dir='/media/jbogoin/Data1/References/RNA-seq/hg38/STAR_71pb_v43'
 
-genome_dir='/media/jbogoin/Data1/References/RNA-seq/hg19/STAR'
+# Ref gencode v43
+ref='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v43.primary_assembly.genome.fa'
 
-ref='/media/jbogoin/Data1/References/fa_hg19/rna-seq/GRCh37.primary_assembly.genome.fa'
-refflat='/media/jbogoin/Data1/References/RNA-seq/hg19/refFlat_hg19.txt'
+refflat='/media/jbogoin/Data1/References/RNA-seq/hg38/refFlat_hg38.txt'
 
-gtf_file='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.annotation.gtf'
+# GTF file gencode v43
+gtf_file='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primary_assembly.basic.annotation.gtf'
 
-gtf_gene='/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.genes.gtf'
-#Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
+# GTF gene v43
+gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primary_assembly.basic.annotation.genes.gtf'
+# Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
 
-# #NG
-# target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.bed'
-# target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_hg19.interval_list'
+# GTF transcript v43
+gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
+
 
 #OA
 target='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON.bed'
 target_il='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON.interval_list'
-
-#globines
-target_glob='/media/jbogoin/Data1/References/fa_hg19/rna-seq/globines_hg19.bed'
-target_glob_il='/media/jbogoin/Data1/References/fa_hg19/rna-seq/globines_hg19.interval_list'
 
 
 #***********************************************************************#
@@ -257,7 +256,7 @@ cd ..
 echo "DROP"
 echo ""
 
-bash ~/SCRIPTS/RNA-Seq/DROP/drop_hg19.sh
+bash ~/SCRIPTS/RNA-Seq/DROP/drop_cibles.sh
 
 
 echo ""
