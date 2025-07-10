@@ -9,7 +9,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 print('\n***PREPARATION DES ANNOTATIONS***\n ')
 
-
+# v47
 gencodeBasic = '/media/jbogoin/Data1/Annotations_RNA-Seq/gencode.v47.chr_patch_hapl_scaff.basic.annotation.gff3.gz'
 
 

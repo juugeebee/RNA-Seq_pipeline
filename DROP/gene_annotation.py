@@ -23,10 +23,13 @@ hpo_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/HPO/1mar2024/genes_to_
 loeuf_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/LOEUF/supplement/loeuf_dataset_grch38.tsv.gz"
 gencodeGene_f = "./Fichiers_annotes/gencode.basic.gene.prot_coding.bed"
 
+# Gencode v43
+# fraser2_f = './drop/output/processed_results/aberrant_splicing/results/v43/fraser/fraser2/results.tsv'
+# outrider_f = './drop/output/processed_results/aberrant_expression/v43/outrider/outrider/OUTRIDER_results.tsv'
 
-fraser2_f = './drop/output/processed_results/aberrant_splicing/results/v43/fraser/fraser2/results.tsv'
-outrider_f = './drop/output/processed_results/aberrant_expression/v43/outrider/outrider/OUTRIDER_results.tsv'
-
+# Gencode v47
+fraser2_f = './drop/output/processed_results/aberrant_splicing/results/v47/fraser/fraser2/results.tsv'
+outrider_f = './drop/output/processed_results/aberrant_expression/v47/outrider/outrider/OUTRIDER_results.tsv'
 
 def tabix_query(file_fn, chrom_fn, start_fn, end_fn):
     """Call tabix (1-based) and generate an array of strings for each line it returns."""
@@ -473,7 +476,7 @@ def fraser2TSV2BED():
 	# supprimer tous les Undetermined
 	fraser2_df.drop(fraser2_df[fraser2_df['sampleID'] == 'Undetermined'].index, inplace = True)
 
-	# Supprimer les patients _ref
+	# Supprimer les patients _ref (normal)
 	ik = fraser2_df[fraser2_df["sampleID"].str.contains("_ref") == True]
 	print('Nombres de temoins Fraser2:')
 	lik =ik['sampleID'].unique()
@@ -492,7 +495,6 @@ def fraser2TSV2BED():
 	fraser2_df.drop(indexNames_pv, inplace=True)
 
 	# Supprimer les colonnes inutiles
-	del fraser2_df['padjustGene']
 	del fraser2_df['pValueGene']
 	###
 	# del fraser2_df['PAIRED_END']
@@ -528,7 +530,7 @@ def outriderTSV2DF():
 	# supprimer tous les Undetermined
 	outrider_df.drop(outrider_df[outrider_df['sampleID'] == 'Undetermined'].index, inplace = True)
 
-	# Supprimer les patients _ref
+	# Supprimer les patients _ref (normal)
 	ik = outrider_df[outrider_df["sampleID"].str.contains("_ref") == True]
 	print('Nombres de temoins Outrider:')
 	lik =ik['sampleID'].unique()
@@ -537,6 +539,7 @@ def outriderTSV2DF():
 
 	indexNames_ref = outrider_df[outrider_df["sampleID"].str.contains("_ref") == True].index
 	outrider_df.drop(indexNames_ref, inplace=True)
+
 
 	# Supprimer les hgncSymbol HLA
 	indexNames_hla = outrider_df[outrider_df["hgncSymbol"].str.contains("HLA") == True].index
@@ -547,7 +550,6 @@ def outriderTSV2DF():
 	outrider_df.drop(indexNames_pv, inplace=True)
 
 	# Supprimer les colonnes inutiles
-	del outrider_df['padjust']
 	del outrider_df['padj_rank']
 	del outrider_df['aberrant']
 	del outrider_df['AberrantBySample']
@@ -557,7 +559,10 @@ def outriderTSV2DF():
 	###
 
 	# Supprimer le . du nom ENSG danas la colonne geneID
+	# print(outrider_df['geneID'])
 	ensg_df = outrider_df['geneID'].str.split(pat='.', n=0, expand=True, regex=None)
+	# print(outrider_df)
+	# print(ensg_df)
 	outrider_df['ensg'] = ensg_df[0]
 	del outrider_df['geneID']
 
@@ -674,15 +679,14 @@ fraser2D['coord'] = fraser2D['seqnames'].astype(str) + ':' + fraser2D['start'].a
 print("\n> OUTRIDER TSV TO DF...")
 outriderD = outriderTSV2DF()
 
+
 print("> OUTRIDER Annotation...")
-
-
 ## MERGE ##
 df_db = df_ensembl.merge(df_genes, left_on='ensg', right_on='ensg', suffixes=('_ensembl', '_genes'), how='outer')
 df_db.to_csv('./Fichiers_annotes/db.csv', sep='\t', index=False)
 
 df_final_fraser2 = fraser2D.merge(df_db, left_on='hgncSymbol', right_on='gene_symbol', suffixes=('_fraser2', '_db'), how='left')
-df_final_outrider = outriderD.merge(df_db, left_on='ensg', right_on='ensg', suffixes=('_fraser2', '_db'), how='left')
+df_final_outrider = outriderD.merge(df_db, left_on='ensg', right_on='ensg', suffixes=('_outrider', '_db'), how='left')
 
 
 ## EXCEL ##
@@ -694,23 +698,23 @@ run_name = path_l[-1]
 # trier le df_final_fraser2
 df_final_fraser2.sort_values(['pValue'], ascending=True, inplace=True)
 del df_final_fraser2['coord_db']
-del df_final_fraser2['distNearestGene']
+# del df_final_fraser2['distNearestGene']
 
 
-# trier le df_final_outrider
+#trier le df_final_outrider
 df_final_outrider.sort_values(['pValue'], ascending=True, inplace=True)
 
 
 # ordonner les colonnes fraser2
-cols_fraser2 = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'psiValue', 'deltaPsi', 'hpo',
- 'clinvar', 'loeuf', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'gene_symbol', 'ensg', 'omim_geneID', 
+cols_fraser2 = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'padjustGene', 'psiValue',  
+ 'deltaPsi', 'hpo',  'clinvar', 'loeuf', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'gene_symbol', 'ensg', 'omim_geneID', 
  'hgnc_id', 'entrez_id', 'UTR_overlap', 'blacklist', 'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 
  'counts', 'totalCounts', 'meanCounts', 'meanTotalCounts', 'nonsplitCounts', 'nonsplitProportion', 'nonsplitProportion_99quantile']
 df_final_fraser2 = df_final_fraser2.reindex(cols_fraser2, axis=1)
 
 
 # ordonner les colonnes outrider
-cols_outrider = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'zScore', 'hpo',
+cols_outrider = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'padjust', 'zScore', 'hpo',
  'clinvar', 'loeuf', 'coord', 'gene_symbol', 'ensg', 'omim_geneID', 'hgnc_id', 'entrez_id', 
  'l2fc', 'rawcounts', 'normcounts', 'meanCorrected', 'theta', 'foldChange']
 df_final_outrider = df_final_outrider.reindex(cols_outrider, axis=1)
@@ -722,7 +726,7 @@ df_final_fraser2.to_excel(writer,sheet_name = "FRASER2", index=False)
 
 
 #coloration panelapp
-longueur = len(df_final_outrider)
+longueur = len(df_final_fraser2)
 
 workbook  = writer.book
 worksheet = writer.sheets['FRASER2']
@@ -755,12 +759,15 @@ worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl1',
                                        'format': yellowFormat})
-writer.save() 
+# writer.save()
+writer.close()
 
 
-## FICHIER FINAL OUTRIDER ##
+# FICHIER FINAL OUTRIDER ##
 writer2 = pandas.ExcelWriter('./Fichiers_annotes/OUTRIDER_' + run_name + '_annote.xlsx', engine='xlsxwriter')
 df_final_outrider.to_excel(writer2,sheet_name = "OUTRIDER", index=False)
+
+longueur = len(df_final_outrider)
 
 #coloration panelapp
 workbook2  = writer2.book
@@ -794,7 +801,8 @@ worksheet2.conditional_format('C2:C'+str(longueur), {'type': 'text',
                                        'criteria': 'containing',
                                        'value': 'Lvl1',
                                        'format': yellowFormat2})
-writer2.save() 
+# writer2.save() 
+writer2.close()
 
 
 print('\n***GENE ANNOTATIONS DONE !***\n ')

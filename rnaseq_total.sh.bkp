@@ -11,21 +11,17 @@ echo ""
 ## A LANCER DANS LE DOSSIER RACINE DU RUN
 #########################################
 
-genome_dir='/media/jbogoin/Data1/References/RNA-seq/hg38/STAR_71pb_v43'
 
-# Ref gencode v43
+genome_dir='/media/jbogoin/Data1/References/RNA-seq/hg38/STAR'
+
 ref='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v43.primary_assembly.genome.fa'
-
 refflat='/media/jbogoin/Data1/References/RNA-seq/hg38/refFlat_hg38.txt'
 
-# GTF file gencode v43
 gtf_file='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primary_assembly.basic.annotation.gtf'
 
-# GTF gene v43
 gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primary_assembly.basic.annotation.genes.gtf'
 # Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
 
-# GTF transcript v43
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
 #NG
@@ -51,11 +47,9 @@ cd Fastq
 conda activate fastqc
 
 mkdir -p ../QC/fastqc
-time parallel -j 16 fastqc {} ::: *.fastq.gz
-# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-# mv *fastqc* ../QC/fastqc
-# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-# for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+# time parallel -j 32 fastqc {} ::: *.fastq.gz
+for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+#for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
 
 conda deactivate
 
@@ -80,7 +74,8 @@ conda activate rnaseq
 
 #***********************************************************************#
 #RUNNING MAPPING JOB
-for R1 in *_R1*.fastq.gz; 
+for R1 in *_R1_001.fastq.gz; 
+#for R1 in *_R1.fastq.gz;
 do R2=${R1/_R1/_R2}; 
    SAMPLE=${R1%%_*};
    FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
@@ -90,17 +85,14 @@ do R2=${R1/_R1/_R2};
       --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
       --readFilesCommand zcat --readFilesIn $R1 $R2 \
       --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
-      --outFileNamePrefix ${SAMPLE}. \
+      --outFileNamePrefix ${SAMPLE} \
       --twopassMode Basic; 
 done
 
 
 #***********************************************************************#
 # CREATION DES INDEXS
-
-# time parallel -j 12 "samtools index {}" ::: *Aligned.sortedByCoord.out.bam
-
-for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
+for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 24 $i; done
 
 
 ############# QC #############
@@ -113,8 +105,6 @@ echo ""
 echo "RNASEQC"
 echo ""
 
-# time parallel -j 12 "rnaseqc $gtf_gene {} {= s/Aligned.sortedByCoord.out.bam/_RNA-SeQC/; =} --sample={= s/Aligned.sortedByCoord.out.bam//; =} --stranded='rf' " ::: *Aligned.sortedByCoord.out.bam
-
 for i in *Aligned.sortedByCoord.out.bam; 
    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
    rnaseqc $gtf_gene $i ${sample}_RNA-SeQC --sample=${sample} --stranded='rf'; 
@@ -126,10 +116,10 @@ conda deactivate
 
 #***********************************************************************#
 # Couverture totale a chaque position du bed
-echo "CollectHsMetrics"
-echo ""
+# echo "CollectHsMetrics"
+# echo ""
 
-conda activate gatk4
+# conda activate gatk4
 
 # echo "pertargetcoverage"
 # echo ""
@@ -152,9 +142,6 @@ conda activate gatk4
 echo "CollectRnaSeqMetrics"
 echo ""
 
-# time parallel -j 12 "gatk CollectRnaSeqMetrics -I {} -O {= s/Aligned.sortedByCoord.out.bam/.RNAseqMetrics.txt/; =} \
-#  --REF_FLAT $refflat -R $ref -STRAND SECOND_READ_TRANSCRIPTION_STRAND \
-#  --RIBOSOMAL_INTERVALS /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.rRNA.transcripts.interval_list" ::: *Aligned.sortedByCoord.out.bam
 
 for i in *Aligned.sortedByCoord.out.bam; 
    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
@@ -164,10 +151,11 @@ for i in *Aligned.sortedByCoord.out.bam;
    --RIBOSOMAL_INTERVALS /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.rRNA.transcripts.interval_list; 
 done
 
+
 conda deactivate
 
 
-# #***********************************************************************#
+#***********************************************************************#
 echo "salmon"
 echo ""
 
@@ -194,7 +182,7 @@ conda activate salmon
 #    -p 12 i '/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v38.transcripts-salmon-format-decoys.idx' --gencode
 
 
-COUNT
+# COUNT
 for R1 in *_R1_001.fastq.gz; 
 #for R1 in *_R1.fastq.gz; 
    do R2=${R1/_R1/_R2};
@@ -335,10 +323,10 @@ multiqc -f .
 conda deactivate
 
 
-# mkdir -p hsMetrics
-# mv *.hsMetrics.txt hsMetrics
-# mkdir -p pertargetcoverage
-# mv *pertargetcoverage* pertargetcoverage
+mkdir -p hsMetrics
+mv *.hsMetrics.txt hsMetrics
+mkdir -p pertargetcoverage
+mv *pertargetcoverage* pertargetcoverage
 mkdir -p RNA-SeQC
 mv *RNA-SeQC RNA-SeQC
 mkdir -p RnaSeqMetrics
@@ -360,12 +348,12 @@ cd ..
 
 
 #***********************************************************************#
-# echo "DROP"
-# echo ""
+echo "DROP"
+echo ""
 
-# bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
+bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
 
 
-# echo ""
-# echo "rnaseq_total.sh job done!"
-# echo ""
+echo ""
+echo "rnaseq_total.sh job done!"
+echo ""

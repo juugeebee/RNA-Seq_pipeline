@@ -49,6 +49,20 @@ snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --reso
 
 conda deactivate
 
+# echo ""
+# echo "External counts done!"
+# echo ""
+
+
+echo ""
+echo "Annotations des fichiers"
+cd ..
+python ~/SCRIPTS/RNA-Seq/DROP/prepare_annotation.py
+python ~/SCRIPTS/RNA-Seq/DROP/gene_annotation.py
+
+
+conda deactivate
+
 echo ""
 echo "drop_cibles.sh job done!"
 echo ""

@@ -5,7 +5,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 
 
 echo ""
-echo "drop..sh start"
+echo "drop.sh start"
 echo ""
 
 
@@ -47,8 +47,20 @@ echo ""
 snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantExpression.log
 
 
+# echo ""
+# echo "Create externals counts"
+# echo ""
+
+# echo ""
+# echo "Lancement d'OUTRIDER"
+# echo ""
+# snakemake exportCounts --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_export_counts.log
+
 conda deactivate
 
+# echo ""
+# echo "External counts done!"
+# echo ""
 
 echo ""
 echo "Annotations des fichiers"
