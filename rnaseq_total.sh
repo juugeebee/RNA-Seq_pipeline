@@ -360,12 +360,12 @@ cd ..
 
 
 #***********************************************************************#
-# echo "DROP"
-# echo ""
+echo "DROP"
+echo ""
 
-# bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
+bash ~/SCRIPTS/RNA-Seq/DROP/drop.sh
 
 
-# echo ""
-# echo "rnaseq_total.sh job done!"
-# echo ""
+echo ""
+echo "rnaseq_total.sh job done!"
+echo ""

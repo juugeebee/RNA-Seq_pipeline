@@ -27,6 +27,7 @@ if [ -d "output" ];then
     rm -Rf output;
     snakemake aberrantSplicing --unlock
     snakemake aberrantExpression --unlock
+    # snakemake exportCounts --unlock
 else :
     echo ''
     echo "Le dossier output n'existe pas !";
@@ -34,6 +35,13 @@ else :
     drop init;
     drop update
 fi
+
+
+# echo ""
+# echo "Lancement de l'external counts"
+# echo ""
+# snakemake exportCounts --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 --rerun-incomplete > drop_export_counts.log
+
 
 echo ""
 echo "Lancement de FRASER2"
@@ -47,20 +55,8 @@ echo ""
 snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantExpression.log
 
 
-# echo ""
-# echo "Create externals counts"
-# echo ""
-
-# echo ""
-# echo "Lancement d'OUTRIDER"
-# echo ""
-# snakemake exportCounts --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_export_counts.log
-
 conda deactivate
 
-# echo ""
-# echo "External counts done!"
-# echo ""
 
 echo ""
 echo "Annotations des fichiers"

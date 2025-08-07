@@ -31,7 +31,7 @@ rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/14OA000513Ali
 rnaid.append('20OA000508_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/20OA000508Aligned.sortedByCoord.out.bam')
 rnaid.append('20OA000549_ref')
-rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/')
+rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/20OA000549Aligned.sortedByCoord.out.bam')
 rnaid.append('20OA001880_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/20OA001880Aligned.sortedByCoord.out.bam')
 rnaid.append('6618OA004357_ref')
@@ -102,8 +102,7 @@ rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/662CY000877Al
 
 df['RNA_ID'] = rnaid
 df['RNA_BAM_FILE'] = rna_bam_file
-#df['DROP_GROUP'] = 'fraser,fraser_external,batch_0,group1,PAXgene'
-df['DROP_GROUP'] = 'fraser2,outrider,batch_0,group1,PAXgene'
+df['DROP_GROUP'] = 'patient,fraser2,outrider,mae,variant_calling,PAXgene'
 df['PAIRED_END'] = 'TRUE'
 df['STRAND'] = 'REVERSE'
 df['COUNT_MODE'] = 'Union'

@@ -15,8 +15,8 @@ print('\n***GENE ANNOTATIONS***\n ')
 
 
 hgnc_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/HGNC/1mar2024/hgnc.tsv"
-panelapp_eng_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/20nov2024/panelapp_england.tsv"
-panelapp_aus_f = '/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/20nov2024/panelapp_australia.tsv'
+panelapp_eng_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/5aug2025/panelapp_england.tsv"
+panelapp_aus_f = '/media/jbogoin/Data1/Annotations_WES_pipeline.v2/panelapp/5aug2025/panelapp_australia.tsv'
 clinvar_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/clinvar/1mar2024/gene_condition_source_id"
 omim_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/OMIM/1mar2024/genemap2.txt"
 hpo_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/HPO/1mar2024/genes_to_phenotype.txt"

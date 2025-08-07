@@ -16,10 +16,10 @@ fichier.write("sampleAnnotation: sample_annotation.tsv\n")
 
 fichier.write("geneAnnotation:\n")
 # fichier.write("    v43: /media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.annotation.gtf\n")
-fichier.write("    v47: /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v47.primary_assembly.basic.annotation.gtf\n")
+fichier.write("    v48: /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v48.basic.annotation.gtf\n")
 fichier.write("genomeAssembly: hg38\n")
 # fichier.write("genome: /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v43.primary_assembly.genome.fa\n")
-fichier.write("genome: /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v47.primary_assembly.genome.fa\n")
+fichier.write("genome: /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v48.primary_assembly.genome.fa\n")
 
 ###############
 fichier.write("\n")
@@ -27,7 +27,7 @@ fichier.write("\n")
 
 fichier.write("exportCounts:\n")
 fichier.write("    geneAnnotations:\n")
-fichier.write("        - v47\n")
+fichier.write("        - v48\n")
 fichier.write("    excludeGroups:\n")
 fichier.write("        - patient\n")
 
@@ -68,12 +68,7 @@ fichier.write("    implementation: PCA\n")
 fichier.write("    padjCutoff: 1\n")
 fichier.write("    maxTestedDimensionProportion: 6\n")
     
-    ### FRASER1 configuration
-# fichier.write('    FRASER_version: "FRASER"\n')
-# fichier.write('    deltaPsiCutoff : 0.3\n') 
-# fichier.write('    quantileForFiltering: 0.95\n') 
     
-    ### For FRASER2, use the follwing parameters instead of the 3 lines above:
 fichier.write('    FRASER_version: "FRASER2"\n')
 fichier.write('    deltaPsiCutoff : 0.1\n') 
 fichier.write('    quantileForFiltering: 0.75\n')
