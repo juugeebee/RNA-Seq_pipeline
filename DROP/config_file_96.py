@@ -15,10 +15,8 @@ fichier.write("hpoFile: /media/jbogoin/Data1/Annotations/HPO/genes_to_disease.tx
 fichier.write("sampleAnnotation: sample_annotation.tsv\n")
 
 fichier.write("geneAnnotation:\n")
-# fichier.write("    v43: /media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.annotation.gtf\n")
 fichier.write("    v48: /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v48.basic.annotation.gtf\n")
 fichier.write("genomeAssembly: hg38\n")
-# fichier.write("genome: /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v43.primary_assembly.genome.fa\n")
 fichier.write("genome: /media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v48.primary_assembly.genome.fa\n")
 
 ###############

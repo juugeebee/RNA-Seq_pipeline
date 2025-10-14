@@ -14,33 +14,33 @@ echo ""
 genome_dir='/media/jbogoin/Data1/References/RNA-seq/hg38/STAR_71pb_v43'
 
 # Ref gencode v43
-ref='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/GRCh38.v43.primary_assembly.genome.fa'
+ref='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/v43/GRCh38.v43.primary_assembly.genome.fa'
 
 refflat='/media/jbogoin/Data1/References/RNA-seq/hg38/refFlat_hg38.txt'
 
 # GTF file gencode v43
-gtf_file='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primary_assembly.basic.annotation.gtf'
+gtf_file='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/v43/gencode.v43.primary_assembly.basic.annotation.gtf'
 
 # GTF gene v43
-gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primary_assembly.basic.annotation.genes.gtf'
+gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/v43/gencode.v43.primary_assembly.basic.annotation.genes.gtf'
 # Obtenu en utilisant le script collapse_annotation.py sur gtf_annotation
 
 # GTF transcript v43
-gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
+gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/v43/gencode.v43.primary_assembly.basic.transcript.gtf'
 
 
 #OA
-target='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON.bed'
-target_il='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON.interval_list'
+target='/media/jbogoin/Data1/References/cibles_panel_OA/ONCO_BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.bed'
+target_il='/media/jbogoin/Data1/References/cibles_panel_OA/ONCO_BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.interval_list'
 
 
 #***********************************************************************#
 # CONCATENATION DES FASTQ
-echo "CAT"
-echo ""
+# echo "CAT"
+# echo ""
 
-cd Fastq_non_cat
-bash ~/SCRIPTS/Files_preparation/cat_fastq.sh
+# cd Fastq_non_cat
+# bash ~/SCRIPTS/Files_preparation/cat_fastq.sh
 
 
 # #TRIMMING DES ADATATEURS
@@ -60,10 +60,10 @@ conda activate fastqc
 
 
 #cd Fastq_trimmed
-cd ../Fastq
+cd Fastq
 mkdir -p ../QC/fastqc
-#for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+# for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
 
 conda deactivate
 
@@ -71,7 +71,6 @@ conda deactivate
 #***********************************************************************#
 #ALIGNEMENT
 #STAR (Spliced Transcripts Alignment to a Reference)
-echo ""
 echo "ALIGNEMENT"
 echo ""
 
@@ -79,15 +78,13 @@ echo ""
 conda activate rnaseq
 
 
-#***********************************************************************#
-# GENERATING GENOME INDEXES
 # STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
 #   --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
 
 
 #***********************************************************************#
 #RUNNING MAPPING JOB
-for R1 in *_R1.fastq.gz; 
+for R1 in *_R1_001.fastq.gz; 
     do R2=${R1/_R1_/_R2_}; 
     SAMPLE=${R1%%_*}; 
     FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
@@ -135,8 +132,8 @@ conda activate gatk4
 
 #***********************************************************************#
 # Couverture totale a chaque position du bed
-echo "pertargetcoverage"
-echo ""
+# echo "pertargetcoverage"
+# echo ""
 
 
 #CIBLES
@@ -152,17 +149,17 @@ for i in *Aligned.sortedByCoord.out.bam;
 done
 
 
-#GLOBINES
-for i in *Aligned.sortedByCoord.out.bam; 
-    do sample=${i%Aligned.sortedByCoord.out.bam}; 
-    gatk CollectHsMetrics \
-    -I $i \
-    -O ${sample}.hsMetrics_glob.txt \
-    -R $ref \
-    --BAIT_INTERVALS $target_glob_il \
-    --TARGET_INTERVALS $target_glob_il \
-    --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_globines.txt;
-done
+# #GLOBINES
+# for i in *Aligned.sortedByCoord.out.bam; 
+#     do sample=${i%Aligned.sortedByCoord.out.bam}; 
+#     gatk CollectHsMetrics \
+#     -I $i \
+#     -O ${sample}.hsMetrics_glob.txt \
+#     -R $ref \
+#     --BAIT_INTERVALS $target_glob_il \
+#     --TARGET_INTERVALS $target_glob_il \
+#     --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_globines.txt;
+# done
 
 
 #***********************************************************************#
@@ -174,7 +171,7 @@ for i in *Aligned.sortedByCoord.out.bam;
    gatk CollectRnaSeqMetrics -I $i -O ${sample}.RNAseqMetrics.txt \
    --REF_FLAT $refflat \
    -R $ref -STRAND SECOND_READ_TRANSCRIPTION_STRAND \
-   --RIBOSOMAL_INTERVALS '/media/jbogoin/Data1/References/fa_hg19/rna-seq/gencode.v41lift37.rRNA.transcripts.interval_list'; 
+   --RIBOSOMAL_INTERVALS '/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/v43/gencode.v43.rRNA.transcripts.interval_list'; 
 done
 
 
@@ -197,7 +194,7 @@ mkdir ../QC
 for R1 in *_R1.fastq.gz; 
    do R2=${R1/_R1/_R2};
    sample=${R1/_R1_001.fastq.gz/};
-   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg19/gencode.v41lift37.transcripts-salmon.idx' \
+   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/salmon/v43/gencode.v43.transcripts-salmon-format.idx' \
    -l ISR \
    -1 $R1 -2 $R2 \
    --validateMappings \

@@ -39,14 +39,14 @@ fi
 echo ""
 echo "Lancement de FRASER2"
 echo ""
-snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 --rerun-triggers mtime -k  > drop_aberrantSplicing.log
-
+snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 --rerun-triggers mtime -k > drop_aberrantSplicing.log
+#snakemake aberrantSplicing --cores 6 --max-threads 24 --default-resources "tmpdir='/media/jbogoin/Data4/tmp'"
 
 echo ""
 echo "Lancement d'OUTRIDER"
 echo ""
 snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 --rerun-triggers mtime -k  > drop_aberrantExpression.log
-
+#snakemake aberrantExpression --cores 6 --max-threads 24 --default-resources "tmpdir='/media/jbogoin/Data4/tmp'"
 
 conda deactivate
 

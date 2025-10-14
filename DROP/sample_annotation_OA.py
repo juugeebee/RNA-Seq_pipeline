@@ -40,7 +40,7 @@ rnaid.append('6619OA002094_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/6619OA002094Aligned.sortedByCoord.out.bam')
 rnaid.append('6619OA002863_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/6619OA002863Aligned.sortedByCoord.out.bam')
-rnaid.append('6619OA00286_ref')
+rnaid.append('6619OA002865_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/6619OA002865Aligned.sortedByCoord.out.bam')
 rnaid.append('6619OA003864_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/6619OA003864Aligned.sortedByCoord.out.bam')
@@ -96,8 +96,6 @@ rnaid.append('6624CY000799_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/6624CY000799Aligned.sortedByCoord.out.bam')
 rnaid.append('6624CY000812_ref')
 rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/6624CY000812Aligned.sortedByCoord.out.bam')
-rnaid.append('662CY000877_ref')
-rna_bam_file.append('/media/jbogoin/Data1/DROP_BAM_OA_hg38/PAXgene/662CY000877Aligned.sortedByCoord.out.bam')
 
 
 df['RNA_ID'] = rnaid

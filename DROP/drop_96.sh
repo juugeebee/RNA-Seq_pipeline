@@ -46,7 +46,10 @@ fi
 echo ""
 echo "Lancement de FRASER2"
 echo ""
-snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantSplicing.log
+snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantExpression.log
+#snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 \
+#    --verbose -p -r --default-resources "tmpdir='/media/jbogoin/Data3/tmp'" \
+#    > drop_aberrantSplicing.log
 
 
 echo ""
