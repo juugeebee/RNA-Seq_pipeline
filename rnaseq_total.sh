@@ -28,37 +28,6 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 # GTF transcript v43
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
-#NG
-# target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
-# target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
-
-
-#OA
-# target='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.bed'
-# target_il='/media/jbogoin/Data1/References/cibles_panel_OA/BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.interval_list'
-
-
-#MB
-
-
-
-#***********************************************************************
-#echo "FastQC"
-#echo ""
-
-cd Fastq
-
-conda activate fastqc
-
-mkdir -p ../QC/fastqc
-time parallel -j 16 fastqc {} ::: *.fastq.gz
-# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-# mv *fastqc* ../QC/fastqc
-# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-# for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-
-conda deactivate
-
 
 #***********************************************************************#
 # ALIGNEMENT
@@ -71,6 +40,9 @@ echo ""
 
 
 conda activate rnaseq
+
+
+cd Fastq
 
 
 # ***********************************************************************#
@@ -99,7 +71,6 @@ done
 # CREATION DES INDEXS
 
 # time parallel -j 12 "samtools index {}" ::: *Aligned.sortedByCoord.out.bam
-
 for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
 
 
@@ -109,9 +80,27 @@ echo "QC"
 echo ""
 
 
+***********************************************************************
+echo "FastQC"
+echo ""
+
+conda activate fastqc
+
+mkdir -p ../QC/fastqc
+time parallel -j 16 fastqc {} ::: *.fastq.gz
+# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+# mv *fastqc* ../QC/fastqc
+# for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+# for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+
+conda deactivate
+
+
 #***********************************************************************#
 echo "RNASEQC"
 echo ""
+
+conda activate rnaseq
 
 # time parallel -j 12 "rnaseqc $gtf_gene {} {= s/Aligned.sortedByCoord.out.bam/_RNA-SeQC/; =} --sample={= s/Aligned.sortedByCoord.out.bam//; =} --stranded='rf' " ::: *Aligned.sortedByCoord.out.bam
 
@@ -130,22 +119,6 @@ echo "CollectHsMetrics"
 echo ""
 
 conda activate gatk4
-
-# echo "pertargetcoverage"
-# echo ""
-
-
-# #CIBLES
-# for i in *Aligned.sortedByCoord.out.bam; 
-#    do sample=${i%Aligned.sortedByCoord.out.bam}
-#       gatk CollectHsMetrics \
-#       -I $i \
-#       -O ${sample}.hsMetrics.txt \
-#       -R $ref \
-#       --BAIT_INTERVALS $target_il \
-#       --TARGET_INTERVALS $target_il \
-#       --PER_TARGET_COVERAGE ${sample}.pertargetcoverage_cibles.txt;
-# done
 
 
 #***********************************************************************#

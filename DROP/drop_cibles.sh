@@ -15,6 +15,7 @@ cd drop
 
 python ~/SCRIPTS/RNA-Seq/DROP/config_file.py
 python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_OA.py
+# python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_NG.py
 
 
 conda activate drop_env
@@ -25,8 +26,8 @@ if [ -d "output" ];then
     echo "Le dossier output existe !";
     echo ''
     rm -Rf output;
-    snakemake aberrantSplicing --unlock
-    snakemake aberrantExpression --unlock
+    snakemake aberrantSplicing --unlock --default-resources
+    snakemake aberrantExpression --unlock --default-resources
 else :
     echo ''
     echo "Le dossier output n'existe pas !";

@@ -52,22 +52,6 @@ target_il='/media/jbogoin/Data1/References/cibles_panel_OA/ONCO_BED_RNASEQ_GENE_
 # cd ..
 
 
-#***********************************************************************
-echo "FastQC"
-echo ""
-
-conda activate fastqc
-
-
-#cd Fastq_trimmed
-cd Fastq
-mkdir -p ../QC/fastqc
-for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-# for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
-
-conda deactivate
-
-
 #***********************************************************************#
 #ALIGNEMENT
 #STAR (Spliced Transcripts Alignment to a Reference)
@@ -75,8 +59,10 @@ echo "ALIGNEMENT"
 echo ""
 
 
-conda activate rnaseq
+#cd Fastq_trimmed
+cd Fastq 
 
+conda activate rnaseq
 
 # STAR --runThreadN 24 --runMode genomeGenerate --genomeDir $genome_dir\
 #   --genomeFastaFiles $ref --sjdbGTFfile $gtf_file --sjdbOverhang 72
@@ -108,6 +94,18 @@ for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
 echo "QC"
 echo ""
 
+#***********************************************************************
+echo "FastQC"
+echo ""
+
+conda activate fastqc
+
+
+mkdir -p ../QC/fastqc
+for R1 in *_R1_001.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+# for R1 in *_R1.fastq.gz; do R2=${R1/_R1/_R2}; fastqc -o ../QC/fastqc -f fastq $R1 $R2; done
+
+conda deactivate
 
 
 #***********************************************************************#

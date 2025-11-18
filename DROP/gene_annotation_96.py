@@ -23,13 +23,11 @@ hpo_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/HPO/1mar2024/genes_to_
 loeuf_f = "/media/jbogoin/Data1/Annotations_WES_pipeline.v2/LOEUF/supplement/loeuf_dataset_grch38.tsv.gz"
 gencodeGene_f = "./Fichiers_annotes/gencode.basic.gene.prot_coding.bed"
 
-# Gencode v43
-# fraser2_f = './drop/output/processed_results/aberrant_splicing/results/v43/fraser/fraser2/results.tsv'
-# outrider_f = './drop/output/processed_results/aberrant_expression/v43/outrider/outrider/OUTRIDER_results.tsv'
 
-# Gencode v47
-fraser2_f = './drop/output/processed_results/aberrant_splicing/results/v47/fraser/fraser2/results.tsv'
-outrider_f = './drop/output/processed_results/aberrant_expression/v47/outrider/outrider/OUTRIDER_results.tsv'
+# Gencode v48
+# fraser2_f = './drop/output/processed_results/aberrant_splicing/results/v48/fraser/fraser2/results.tsv'
+outrider_f = './drop/output/processed_results/aberrant_expression/v48/outrider/outrider/OUTRIDER_results_partie_2.tsv'
+
 
 def tabix_query(file_fn, chrom_fn, start_fn, end_fn):
     """Call tabix (1-based) and generate an array of strings for each line it returns."""
@@ -664,15 +662,15 @@ df_ensembl = df_ensembl.rename(columns={'index': 'ensg'})
 df_ensembl.to_csv('./Fichiers_annotes/ensembl.csv', sep='\t', index=False)
 
 
-#### FRASER2 ####
-print("\n> FRASER2 TSV TO DF...")
-fraser2D = fraser2TSV2BED()
+# #### FRASER2 ####
+# print("\n> FRASER2 TSV TO DF...")
+# fraser2D = fraser2TSV2BED()
 
-print("> FRASER2 Annotation...")
-fraser2D = fraser2Annot(fraser2D)
+# print("> FRASER2 Annotation...")
+# fraser2D = fraser2Annot(fraser2D)
 
-fraser2D['coord'] = fraser2D['seqnames'].astype(str) + ':' + fraser2D['start'].astype(str) + '-' + fraser2D['end'].astype(str)
-# print(fraser2D.columns.values.tolist())
+# fraser2D['coord'] = fraser2D['seqnames'].astype(str) + ':' + fraser2D['start'].astype(str) + '-' + fraser2D['end'].astype(str)
+# # print(fraser2D.columns.values.tolist())
 
 
 #### OUTRIDER ####
@@ -685,7 +683,7 @@ print("> OUTRIDER Annotation...")
 df_db = df_ensembl.merge(df_genes, left_on='ensg', right_on='ensg', suffixes=('_ensembl', '_genes'), how='outer')
 df_db.to_csv('./Fichiers_annotes/db.csv', sep='\t', index=False)
 
-df_final_fraser2 = fraser2D.merge(df_db, left_on='hgncSymbol', right_on='gene_symbol', suffixes=('_fraser2', '_db'), how='left')
+# df_final_fraser2 = fraser2D.merge(df_db, left_on='hgncSymbol', right_on='gene_symbol', suffixes=('_fraser2', '_db'), how='left')
 df_final_outrider = outriderD.merge(df_db, left_on='ensg', right_on='ensg', suffixes=('_outrider', '_db'), how='left')
 
 
@@ -695,75 +693,76 @@ path_l = path.split('/')
 run_name = path_l[-1]
 
 
-# trier le df_final_fraser2
-df_final_fraser2.sort_values(['pValue'], ascending=True, inplace=True)
-del df_final_fraser2['coord_db']
-# del df_final_fraser2['distNearestGene']
+# # trier le df_final_fraser2
+# df_final_fraser2.sort_values(['pValue'], ascending=True, inplace=True)
+# del df_final_fraser2['coord_db']
+# # del df_final_fraser2['distNearestGene']
 
 
 #trier le df_final_outrider
 df_final_outrider.sort_values(['pValue'], ascending=True, inplace=True)
 
 
-# ordonner les colonnes fraser2
-cols_fraser2 = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'padjustGene', 'psiValue',
-'deltaPsi', 'hpo',  'clinvar', 'loeuf', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'gene_symbol', 'ensg', 'omim_geneID', 
-'hgnc_id', 'entrez_id', 'UTR_overlap', 'blacklist', 'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 
-'counts', 'totalCounts', 'meanCounts', 'meanTotalCounts', 'nonsplitCounts', 'nonsplitProportion', 'nonsplitProportion_99quantile']
-df_final_fraser2 = df_final_fraser2.reindex(cols_fraser2, axis=1)
+# # ordonner les colonnes fraser2
+# cols_fraser2 = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'padjustGene', 'psiValue',  
+#  'deltaPsi', 'hpo',  'clinvar', 'loeuf', 'seqnames', 'start', 'end', 'coord_fraser2', 'width', 'strand', 'gene_symbol', 'ensg', 'omim_geneID', 
+#  'hgnc_id', 'entrez_id', 'UTR_overlap', 'blacklist', 'type', 'potentialImpact', 'annotatedJunction', 'causesFrameshift', 
+#  'counts', 'totalCounts', 'meanCounts', 'meanTotalCounts', 'nonsplitCounts', 'nonsplitProportion', 'nonsplitProportion_99quantile']
+# df_final_fraser2 = df_final_fraser2.reindex(cols_fraser2, axis=1)
 
 
 # ordonner les colonnes outrider
-cols_outrider = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'padjust', 'zScore', 'hpo','clinvar', 'loeuf', 'coord', 'gene_symbol', 'ensg', 'omim_geneID', 'hgnc_id', 'entrez_id', 
+cols_outrider = ['sampleID', 'panelapp_eng', 'panelapp_aus', 'omim_disease', 'omim_inheritance', 'hgncSymbol', 'pValue', 'padjust', 'zScore', 'hpo',
+ 'clinvar', 'loeuf', 'coord', 'gene_symbol', 'ensg', 'omim_geneID', 'hgnc_id', 'entrez_id', 
  'l2fc', 'rawcounts', 'normcounts', 'meanCorrected', 'theta', 'foldChange']
 df_final_outrider = df_final_outrider.reindex(cols_outrider, axis=1)
 
 
-## FICHIER FINAL FRASER2 ##
-writer = pandas.ExcelWriter('./Fichiers_annotes/FRASER2_' + run_name + '_annote.xlsx', engine='xlsxwriter')
-df_final_fraser2.to_excel(writer,sheet_name = "FRASER2", index=False)
+# ## FICHIER FINAL FRASER2 ##
+# writer = pandas.ExcelWriter('./Fichiers_annotes/FRASER2_' + run_name + '_annote.xlsx', engine='xlsxwriter')
+# df_final_fraser2.to_excel(writer,sheet_name = "FRASER2", index=False)
 
 
-#coloration panelapp
-longueur = len(df_final_fraser2)
+# #coloration panelapp
+# longueur = len(df_final_fraser2)
 
-workbook  = writer.book
-worksheet = writer.sheets['FRASER2']
-greenFormat  = workbook.add_format({'bg_color': 'lime'})
-worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                        'criteria': 'containing',
-                                        'value': 'Lvl3',
-                                        'format': greenFormat})
-redFormat  = workbook.add_format({'bg_color': 'red'})
-worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                        'criteria': 'containing',
-                                        'value': 'Lvl2',
-                                        'format': redFormat})
-yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
-worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                        'criteria': 'containing',
-                                        'value': 'Lvl1',
-                                        'format': yellowFormat})
-worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                        'criteria': 'containing',
-                                        'value': 'Lvl3',
-                                        'format': greenFormat})
-redFormat  = workbook.add_format({'bg_color': 'red'})
-worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                        'criteria': 'containing',
-                                        'value': 'Lvl2',
-                                        'format': redFormat})
-yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
-worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                        'criteria': 'containing',
-                                        'value': 'Lvl1',
-                                        'format': yellowFormat})
-# writer.save()
-writer.close()
+# workbook  = writer.book
+# worksheet = writer.sheets['FRASER2']
+# greenFormat  = workbook.add_format({'bg_color': 'lime'})
+# worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
+#                                        'criteria': 'containing',
+#                                        'value': 'Lvl3',
+#                                        'format': greenFormat})
+# redFormat  = workbook.add_format({'bg_color': 'red'})
+# worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
+#                                        'criteria': 'containing',
+#                                        'value': 'Lvl2',
+#                                        'format': redFormat})
+# yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
+# worksheet.conditional_format('B2:B'+str(longueur), {'type': 'text',
+#                                        'criteria': 'containing',
+#                                        'value': 'Lvl1',
+#                                        'format': yellowFormat})
+# worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
+#                                        'criteria': 'containing',
+#                                        'value': 'Lvl3',
+#                                        'format': greenFormat})
+# redFormat  = workbook.add_format({'bg_color': 'red'})
+# worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
+#                                        'criteria': 'containing',
+#                                        'value': 'Lvl2',
+#                                        'format': redFormat})
+# yellowFormat  = workbook.add_format({'bg_color': 'yellow'})
+# worksheet.conditional_format('C2:C'+str(longueur), {'type': 'text',
+#                                        'criteria': 'containing',
+#                                        'value': 'Lvl1',
+#                                        'format': yellowFormat})
+# # writer.save()
+# writer.close()
 
 
 # FICHIER FINAL OUTRIDER ##
-writer2 = pandas.ExcelWriter('./Fichiers_annotes/OUTRIDER_' + run_name + '_annote.xlsx', engine='xlsxwriter')
+writer2 = pandas.ExcelWriter('./Fichiers_annotes/OUTRIDER_' + run_name + '_annote_02.xlsx', engine='xlsxwriter')
 df_final_outrider.to_excel(writer2,sheet_name = "OUTRIDER", index=False)
 
 longueur = len(df_final_outrider)
