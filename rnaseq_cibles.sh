@@ -76,7 +76,7 @@ for R1 in *_R1_001.fastq.gz;
     FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
     DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
     BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
-    STAR --runThreadN 12 --genomeDir $genome_dir -n 10000\
+    STAR --runThreadN 24 --genomeDir $genome_dir -n 10000\
          --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
          --readFilesCommand zcat --readFilesIn $R1 $R2 \
          --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
