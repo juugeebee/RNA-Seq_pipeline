@@ -14,8 +14,8 @@ cd drop
 
 
 python ~/SCRIPTS/RNA-Seq/DROP/config_file.py
-python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_OA.py
-# python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_NG.py
+#python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_OA.py
+python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation_NG.py
 
 
 conda activate drop_env

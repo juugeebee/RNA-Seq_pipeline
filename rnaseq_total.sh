@@ -29,6 +29,9 @@ gtf_gene='/media/jbogoin/Data1/References/fa_hg38/hg38_rnaseq/gencode.v43.primar
 gtf_transcript='/media/jbogoin/Data1/References/RNA-seq/hg38/gencode.v43.primary_assembly.basic.transcript.gtf'
 
 
+ReadLength=149
+
+
 #***********************************************************************#
 # ALIGNEMENT
 # STAR (Spliced Transcripts Alignment to a Reference)
@@ -52,19 +55,37 @@ cd Fastq
 
 #***********************************************************************#
 #RUNNING MAPPING JOB
-for R1 in *_R1*.fastq.gz; 
-do R2=${R1/_R1/_R2}; 
+for R1 in *_R1_001.fastq.gz; do
+   R2=${R1/_R1_/_R2_};
    SAMPLE=${R1%%_*};
-   FLOWCELL="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 3)"; 
-   DEVICE="$(zcat $R1 | head -1 | awk '{print $1}' | cut -d ":" -f 1 | cut -d "@" -f 2)"; 
-   BARCODE="$(zcat $R1 | head -1 | awk '{print $2}' | cut -d ":" -f 4)"; 
-   STAR --runThreadN 24 --genomeDir $genome_dir -n 10000 \
-      --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
-      --readFilesCommand zcat --readFilesIn $R1 $R2 \
-      --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:Il-str-mRNA-D SM:${SAMPLE} \
-      --outFileNamePrefix ${SAMPLE}. \
-      --twopassMode Basic; 
+
+   # Lire une seule fois la première ligne du FASTQ
+   HEADER=$(zcat "$R1" | head -n 1);
+
+   DEVICE=$(echo "$HEADER" | cut -d':' -f1 | sed 's/^@//');
+   FLOWCELL=$(echo "$HEADER" | cut -d':' -f3);
+   BARCODE=$(echo "$HEADER" | awk '{print $2}' | cut -d':' -f4);
+
+   STAR \
+      --runThreadN 24 \
+      --genomeDir "$genome_dir" \
+      --sjdbGTFfile "$gtf_file" \
+      --sjdbOverhang "$ReadLength" \
+      --readFilesCommand zcat \
+      --readFilesIn "$R1" "$R2" \
+      --outSAMtype BAM SortedByCoordinate \
+      --outSAMunmapped Within \
+      --outReadsUnmapped None \
+      --outSAMattrRGline ID:${DEVICE}.${FLOWCELL}.${SAMPLE} PL:ILLUMINA PU:${FLOWCELL}.${BARCODE} LB:SureSelect-XT-HS2mRNA-Library_${SAMPLE}_${BARCODE} SM:${SAMPLE} \
+      --outFileNamePrefix ${SAMPLE}_ \
+      --twopassMode Basic;
+
+    rm ${SAMPLE}Log.out ${SAMPLE}Log.progress.out ${SAMPLE}Log.final.out ${SAMPLE}SJ.out.tab;
+    rm -rf ${SAMPLE}_STAR*
 done
+
+
+
 
 
 #***********************************************************************#
