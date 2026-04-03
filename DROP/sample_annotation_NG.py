@@ -13,7 +13,7 @@ rna_bam_file = []
 
 
 for f in listdir("../BAM") :
-    if ('_Aligned.sortedByCoord.out.bam' in f) and ('bai' not in f) :
+    if ('Aligned.sortedByCoord.out.bam' in f) and ('bai' not in f) :
         rna_bam_file.append('/' + chemin_minus_drop + '/BAM/' + f)
         id_l = f.split('Aligned.sortedByCoord')
         sample = id_l[0]

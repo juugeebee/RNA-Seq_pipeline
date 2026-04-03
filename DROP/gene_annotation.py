@@ -527,17 +527,26 @@ def outriderTSV2DF():
 	# importer le fichier brut
 	outrider_df = pandas.read_csv(outrider_f, header=[0], sep='\t')
 
+
 	# supprimer tous les Undetermined
 	outrider_df.drop(outrider_df[outrider_df['sampleID'] == 'Undetermined'].index, inplace = True)
+
+	
 
 	# Supprimer les patients _ref (normal)
 	ik = outrider_df[outrider_df["sampleID"].str.contains("_ref") == True]
 	print('Nombres de temoins Outrider:')
 	lik =ik['sampleID'].unique()
-	print(len(lik))
-	ik['sampleID'].to_csv('./Fichiers_annotes/temoins_outrider.csv', header=False, index=False, sep='\t')
+	#lik['sampleID'].to_csv('./Fichiers_annotes/temoins_outrider.csv', header=False, index=False, sep='\t')
+	
+	doc=open('./Fichiers_annotes/temoins_outrider.csv','w')
+	for id in lik :
+		doc.writelines(id)
+		doc.write('\n')
+	doc.close()
 
 	indexNames_ref = outrider_df[outrider_df["sampleID"].str.contains("_ref") == True].index
+	print(indexNames_ref )
 	outrider_df.drop(indexNames_ref, inplace=True)
 
 
@@ -558,11 +567,10 @@ def outriderTSV2DF():
 	# del outrider_df['FDR_set']
 	###
 
+
 	# Supprimer le . du nom ENSG danas la colonne geneID
 	# print(outrider_df['geneID'])
 	ensg_df = outrider_df['geneID'].str.split(pat='.', n=0, expand=True, regex=None)
-	# print(outrider_df)
-	# print(ensg_df)
 	outrider_df['ensg'] = ensg_df[0]
 	del outrider_df['geneID']
 

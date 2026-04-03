@@ -812,87 +812,64 @@ df_final_outrider2 = df_final_outrider2.reindex(cols_outrider, axis=1)
 # writer.close()
 
 
-# FICHIER FINAL OUTRIDER ##
-writer2 = pandas.ExcelWriter('./Fichiers_annotes/OUTRIDER_' + run_name + '_annote_01.xlsx', engine='xlsxwriter')
-df_final_outrider1.to_excel(writer2,sheet_name = "OUTRIDER", index=False)
+# # FICHIER FINAL OUTRIDER ##
+output_file = './Fichiers_annotes/OUTRIDER_' + run_name + '_annote.xlsx'
 
-longueur = len(df_final_outrider1)
+with pandas.ExcelWriter(output_file, engine='xlsxwriter') as writer2:
 
-#coloration panelapp
-workbook2  = writer2.book
-worksheet2 = writer2.sheets['OUTRIDER']
-greenFormat2  = workbook2.add_format({'bg_color': 'lime'})
-worksheet2.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl3',
-                                       'format': greenFormat2})
-redFormat2  = workbook2.add_format({'bg_color': 'red'})
-worksheet2.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl2',
-                                       'format': redFormat2})
-yellowFormat2  = workbook2.add_format({'bg_color': 'yellow'})
-worksheet2.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl1',
-                                       'format': yellowFormat2})
-worksheet2.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl3',
-                                       'format': greenFormat2})
-redFormat2  = workbook2.add_format({'bg_color': 'red'})
-worksheet2.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl2',
-                                       'format': redFormat2})
-yellowFormat2  = workbook2.add_format({'bg_color': 'yellow'})
-worksheet2.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl1',
-                                       'format': yellowFormat2})
-# writer2.save() 
-writer2.close()
+    max_rows = 1048575   # Excel limit - header
 
+    workbook2 = writer2.book
 
-writer3 = pandas.ExcelWriter('./Fichiers_annotes/OUTRIDER_' + run_name + '_annote_02.xlsx', engine='xlsxwriter')
-df_final_outrider2.to_excel(writer3,sheet_name = "OUTRIDER", index=False)
+    # formats (créés une seule fois)
+    greenFormat2 = workbook2.add_format({'bg_color': 'lime'})
+    redFormat2 = workbook2.add_format({'bg_color': 'red'})
+    yellowFormat2 = workbook2.add_format({'bg_color': 'yellow'})
 
-longueur = len(df_final_outrider2)
+    for i, start in enumerate(range(0, len(df_final_outrider1), max_rows)):
 
-#coloration panelapp
-workbook3  = writer3.book
-worksheet3 = writer3.sheets['OUTRIDER']
-greenFormat3  = workbook3.add_format({'bg_color': 'lime'})
-worksheet3.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl3',
-                                       'format': greenFormat2})
-redFormat3  = workbook3.add_format({'bg_color': 'red'})
-worksheet3.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl2',
-                                       'format': redFormat2})
-yellowFormat3  = workbook3.add_format({'bg_color': 'yellow'})
-worksheet3.conditional_format('B2:B'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl1',
-                                       'format': yellowFormat2})
-worksheet3.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl3',
-                                       'format': greenFormat2})
-redFormat3  = workbook3.add_format({'bg_color': 'red'})
-worksheet3.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl2',
-                                       'format': redFormat2})
-yellowFormat3  = workbook3.add_format({'bg_color': 'yellow'})
-worksheet3.conditional_format('C2:C'+str(longueur), {'type': 'text',
-                                       'criteria': 'containing',
-                                       'value': 'Lvl1',
-                                       'format': yellowFormat2})
-# writer3.save() 
-writer3.close()
+        chunk = df_final_outrider1.iloc[start:start+max_rows]
+        sheet_name = f"OUTRIDER_{i+1}"
+
+        print(f"Writing {sheet_name}...")
+
+        chunk.to_excel(writer2, sheet_name=sheet_name, index=False)
+
+        worksheet2 = writer2.sheets[sheet_name]
+
+        longueur = len(chunk) + 1   # +1 header
+
+        # Colonne B
+        worksheet2.conditional_format(
+            f'B2:B{longueur}',
+            {'type': 'text', 'criteria': 'containing', 'value': 'Lvl3', 'format': greenFormat2}
+        )
+
+        worksheet2.conditional_format(
+            f'B2:B{longueur}',
+            {'type': 'text', 'criteria': 'containing', 'value': 'Lvl2', 'format': redFormat2}
+        )
+
+        worksheet2.conditional_format(
+            f'B2:B{longueur}',
+            {'type': 'text', 'criteria': 'containing', 'value': 'Lvl1', 'format': yellowFormat2}
+        )
+
+        # Colonne C
+        worksheet2.conditional_format(
+            f'C2:C{longueur}',
+            {'type': 'text', 'criteria': 'containing', 'value': 'Lvl3', 'format': greenFormat2}
+        )
+
+        worksheet2.conditional_format(
+            f'C2:C{longueur}',
+            {'type': 'text', 'criteria': 'containing', 'value': 'Lvl2', 'format': redFormat2}
+        )
+
+        worksheet2.conditional_format(
+            f'C2:C{longueur}',
+            {'type': 'text', 'criteria': 'containing', 'value': 'Lvl1', 'format': yellowFormat2}
+        )
 
 
 print('\n***GENE ANNOTATIONS DONE !***\n ')

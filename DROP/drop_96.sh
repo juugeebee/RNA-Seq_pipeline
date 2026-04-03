@@ -52,7 +52,7 @@ fi
 echo ""
 echo "Lancement d'OUTRIDER"
 echo ""
-python ~/SCRIPTS/RNA-Seq/DROP/beforeOUTRIDER.py
+# python ~/SCRIPTS/RNA-Seq/DROP/beforeOUTRIDER.py
 snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantExpression.log
 
 
