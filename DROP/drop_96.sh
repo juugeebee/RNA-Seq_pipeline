@@ -53,7 +53,12 @@ echo ""
 echo "Lancement d'OUTRIDER"
 echo ""
 # python ~/SCRIPTS/RNA-Seq/DROP/beforeOUTRIDER.py
-snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantExpression.log
+# snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantExpression.log
+
+
+snakemake aberrantExpression --cores 4 --max-threads 24 \
+  --latency-wait 50 --resources mem_mb=100 \
+  2>&1 | tee drop_aberrantExpression.log
 
 
 conda deactivate
@@ -61,11 +66,21 @@ conda deactivate
 
 echo ""
 echo "Annotations des fichiers"
+
+
 cd ..
 python ~/SCRIPTS/RNA-Seq/DROP/prepare_annotation.py
 
 
-cd ./drop/output/processed_results/aberrant_expression/v48/outrider/outrider
+TARGET_DIR="./drop/output/processed_results/aberrant_expression/v48/outrider/outrider"
+
+[[ -d "$TARGET_DIR" ]] || {
+	    echo "Erreur : le répertoire '$TARGET_DIR' n'existe pas." >&2
+    exit 1
+}
+
+cd "$TARGET_DIR" || exit 1
+
 
 header=$(head -n 1 OUTRIDER_results.tsv)
 total=$(($(wc -l < OUTRIDER_results.tsv) - 1))
@@ -77,10 +92,15 @@ half=$((total / 2))
 # deuxième moitié
 { echo "$header"; tail -n +$((half + 2)) OUTRIDER_results.tsv; } > OUTRIDER_results_partie_2.tsv
 
+
 cd ../../../../../../..
 
 
 python ~/SCRIPTS/RNA-Seq/DROP/gene_annotation_96.py
+
+
+python ~/SCRIPTS/RNA-Seq/DROP/outrider_volcano_plots.py
+
 
 echo ""
 echo "drop.sh job done!"

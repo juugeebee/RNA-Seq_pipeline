@@ -44,15 +44,15 @@ fi
 
 
 echo ""
-echo "Lancement de FRASER2"
-echo ""
-snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantSplicing.log
-
-
-echo ""
 echo "Lancement d'OUTRIDER"
 echo ""
 snakemake aberrantExpression --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantExpression.log
+
+
+echo ""
+echo "Lancement de FRASER2"
+echo ""
+snakemake aberrantSplicing --cores 4 --max-threads 24 --latency-wait 50 --resources mem_mb=100 > drop_aberrantSplicing.log
 
 
 conda deactivate
@@ -63,6 +63,7 @@ echo "Annotations des fichiers"
 cd ..
 python ~/SCRIPTS/RNA-Seq/DROP/prepare_annotation.py
 python ~/SCRIPTS/RNA-Seq/DROP/gene_annotation.py
+python ~/SCRIPTS/RNA-Seq/DROP/outrider_volcano_plots.py
 
 
 echo ""

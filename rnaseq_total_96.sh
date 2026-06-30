@@ -65,9 +65,11 @@ do R2=${R1/_R1/_R2};
    --outFileNamePrefix ${SAMPLE} \
    --twopassMode Basic \
    --outSJfilterReads Unique;
-   rm ${SAMPLE}Log.out ${SAMPLE}Log.progress.out ${SAMPLE}Log.final.out ${SAMPLE}SJ.out.tab;
-   rm -rf ${SAMPLE}_STAR*;
 done
+
+
+rm -Rf *STAR*
+rm -f *out*
 
 
 #***********************************************************************#
@@ -78,6 +80,10 @@ done
 for i in *Aligned.sortedByCoord.out.bam; do samtools index -@ 16 $i; done
 
 conda deactivate
+
+
+mkdir -p ../BAM
+mv `ls . | grep -v "\.gz$"` ../BAM
 
 
 ############# QC #############
@@ -95,7 +101,8 @@ conda activate rnaseq
 # time parallel -j 12 "rnaseqc $gtf_gene {} {= s/Aligned.sortedByCoord.out.bam/_RNA-SeQC/; =} --sample={= s/Aligned.sortedByCoord.out.bam//; =} --stranded='rf' " ::: *Aligned.sortedByCoord.out.bam
 
 
-cd BAM
+cd ../BAM
+
 
 for i in *Aligned.sortedByCoord.out.bam; 
    do sample=${i/Aligned.sortedByCoord.out.bam/}; 
@@ -127,42 +134,38 @@ done
 conda deactivate
 
 
-# #***********************************************************************#
-echo "salmon"
-echo ""
+#***********************************************************************#
+#echo "salmon"
+#echo ""
 
-conda activate salmon
+#conda activate salmon
 
-cd ../Fastq
+#cd ../Fastq
 
 #COUNT
 #for R1 in *_R1_001.fastq.gz; 
-for R1 in *_R1.fastq.gz; 
-   do R2=${R1/_R1/_R2};
-   sample=${R1%%_*};
-   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/salmon/gencode.v48.transcripts-salmon-format.idx' \
-   -l ISR \
-   -1 $R1 -2 $R2 \
-   --validateMappings \
-   -p 24 \
-   -o ../QC/salmon/$sample;
-done
+##for R1 in *_R1.fastq.gz; 
+#   do R2=${R1/_R1/_R2};
+#   sample=${R1%%_*};
+#   salmon quant -i '/media/jbogoin/Data1/References/RNA-seq/hg38/salmon/gencode.v48.transcripts-salmon-format.idx' \
+#   -l ISR \
+#   -1 $R1 -2 $R2 \
+#   --validateMappings \
+#   -p 24 \
+#   -o ../QC/salmon/$sample;
+#done
 
 
-conda deactivate
+#conda deactivate
 
 
 #***********************************************************************
 ### CLEANING
 
-cd ../BAM
-
 
 mv *_RNA-SeQC ../QC
 mv *.RNAseqMetrics.txt ../QC
 mv *.hsMetrics.txt ../QC
-
-cd ../QC
 
 
 #***********************************************************************#
@@ -170,22 +173,17 @@ echo "multiqc"
 echo ""
 
 conda activate rnaseq
+cd ../QC
 
 multiqc -f .
 
 conda deactivate
-
+#***********************************************************************#
 
 mkdir -p RNA-SeQC
 mv *RNA-SeQC RNA-SeQC
 mkdir -p RnaSeqMetrics
 mv *.RNAseqMetrics.txt RnaSeqMetrics
-
-
-mkdir -p ../BAM
-
-cd ../Fastq
-mv `ls . | grep -v "\.gz$"` ../BAM
 
 cd ..
 
