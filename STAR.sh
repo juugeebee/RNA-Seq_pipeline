@@ -40,7 +40,14 @@ cd Fastq
 
 
 # Check and concatenate fastq files if needed
-bash ~/SCRIPTS/Files_preparation/check_and_concat_fastq.sh
+MAX_LANES=$(ls *_R1*.fastq.gz | sed -E 's/_L[0-9]+_R1_001\.fastq\.gz$//' | sort | uniq -c | awk '{print $1}' | sort -n | tail -1)
+
+if [ "$MAX_LANES" -gt 1 ]; then
+    echo "Plusieurs lanes detectees, lancement de la concatenation..."
+    bash ~/SCRIPTS/Files_preparation/check_and_concat_fastq.sh
+else
+    echo "1 seule lane par echantillon, pas de concatenation necessaire."
+fi 
 
 
 # Check read length
