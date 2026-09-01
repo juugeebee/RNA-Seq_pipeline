@@ -7,14 +7,34 @@ echo "rnaseq_cibles.sh start"
 echo ""
 
 
-#OA
-# target='/media/jbogoin/Data1/References/cibles_panel_OA/ONCO_BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.bed'
-# target_il='/media/jbogoin/Data1/References/cibles_panel_OA/ONCO_BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.interval_list'
+echo "Choisissez l'UF :"
+
+select ENV in NG OA; do
+    case $ENV in
+        NG)
+            export ENV
+            export target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
+            export target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
+            break
+            ;;
+        OA)
+            export ENV
+            export target='/media/jbogoin/Data1/References/cibles_panel_OA/ONCO_BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.bed'
+            export target_il='/media/jbogoin/Data1/References/cibles_panel_OA/ONCO_BED_RNASEQ_GENE_DIAG_CODING_EXON_hg38.interval_list'
+            break
+            ;;
+        *)
+            echo "Choix invalide."
+            ;;
+    esac
+done
 
 
-#NG
-target='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.bed'
-target_il='/media/jbogoin/Data1/References/cibles_panels_NG/RNAseq_UFNeuro_v1_Regions_liftover_hg38_ucsc.interval_list'
+echo ""
+echo "UF sélectionnée : $ENV"
+echo "Fichier cible : $target"
+echo ""
+
 
 
 #***********************************************************************#

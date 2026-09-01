@@ -44,16 +44,19 @@ MAX_LANES=$(ls *_R1*.fastq.gz | sed -E 's/_L[0-9]+_R1_001\.fastq\.gz$//' | sort 
 
 if [ "$MAX_LANES" -gt 1 ]; then
     echo "Plusieurs lanes detectees, lancement de la concatenation..."
+    echo ""
     bash ~/SCRIPTS/Files_preparation/check_and_concat_fastq.sh
 else
     echo "1 seule lane par echantillon, pas de concatenation necessaire."
+    echo ""
 fi 
 
 
 # Check read length
 FASTQ=$(ls *.fastq.gz | head -1)
 ReadLength=$(zcat "$FASTQ" | head -2 | tail -1 | awk '{print length($0)}')
-echo $ReadLength
+echo "Longueur des reads : $ReadLength"
+echo ""
 
 
 conda activate rnaseq

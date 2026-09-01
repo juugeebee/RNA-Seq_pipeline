@@ -9,12 +9,12 @@ echo "drop_export_counts.sh start"
 echo ""
 
 
-mkdir -p drop
-cd drop
+# mkdir -p drop
+# cd drop
 
 
-python ~/SCRIPTS/RNA-Seq/DROP/config_file.py
-python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation.py
+# python ~/SCRIPTS/RNA-Seq/DROP/config_file.py
+# python ~/SCRIPTS/RNA-Seq/DROP/sample_annotation.py
 
 
 conda activate drop_env
@@ -49,14 +49,16 @@ echo ""
 snakemake aberrantSplicing --cores 1 --max-threads 24 --latency-wait 50 --resources mem_mb=100000 > drop_aberrantSplicing.log
 
 
+echo ""
+echo "Lancement de l'external counts"
+echo ""
+snakemake exportCounts --cores 1 --max-threads 24 --latency-wait 50 --resources mem_mb=100000 > drop_export_counts.log
+
+
+
 conda deactivate
 
 
-python ~/SCRIPTS/RNA-Seq/DROP/prepare_annotation.py
-python ~/SCRIPTS/RNA-Seq/DROP/gene_annotation.py
-python ~/SCRIPTS/RNA-Seq/DROP/outrider_volcano_plots.py
-
-
 echo ""
-echo "drop_export_counts.sh job done!"
+echo "drop.sh job done!"
 echo ""

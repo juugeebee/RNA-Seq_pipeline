@@ -17,8 +17,9 @@ PVALUE_COL   = "pValue"
 GENE_COL     = "gene_symbol"
 PATIENT_COL  = "sampleID"
 # Seuils pour la mise en couleur
-ZSCORE_THRESH  = 1.5     # |zScore| >= seuil → significatif
-PVALUE_THRESH  = 1.3     # -log10(pValue) >= seuil → significatif (ex: 1.3 ≈ p=0.05)
+ZSCORE_THRESH  = 2     # |zScore| >= seuil → significatif
+#PVALUE_THRESH  = 1.3     # -log10(pValue) >= seuil → significatif (ex: 1.3 ≈ p=0.05)
+PVALUE_THRESH  = 3.5     # -log10(pValue) >= seuil → significatif (ex: 1.3 ≈ p=0.05)
 # ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -90,7 +91,8 @@ def volcano_for_patient(df_patient, patient_id, out_dir):
     pad_x = (df[ZSCORE_COL].max() - df[ZSCORE_COL].min()) * 0.10 or 0.5
     pad_y = (df["-log10p"].max() - df["-log10p"].min()) * 0.10 or 0.5
     ax.set_xlim(df[ZSCORE_COL].min() - pad_x, df[ZSCORE_COL].max() + pad_x)
-    ax.set_ylim(df["-log10p"].min() - pad_y, df["-log10p"].max() + pad_y)
+    #ax.set_ylim(df["-log10p"].min() - pad_y, df["-log10p"].max() + pad_y)
+    ax.set_ylim(0.5)
 
     ax.set_xlabel("Z-score", fontsize=12)
     ax.set_ylabel("-log₁₀(p-value)", fontsize=12)
