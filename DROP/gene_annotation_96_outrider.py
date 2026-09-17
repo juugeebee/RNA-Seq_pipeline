@@ -25,8 +25,8 @@ gencodeGene_f = "./Fichiers_annotes/gencode.basic.gene.prot_coding.bed"
 
 
 # Gencode v48
-outrider_f = './drop/output/processed_results/aberrant_expression/v48/outrider/outrider/OUTRIDER_results_partie_1.tsv'
-outrider_f2 = './drop/output/processed_results/aberrant_expression/v48/outrider/outrider/OUTRIDER_results_partie_2.tsv'
+outrider_f = './drop/output/processed_results/aberrant_expression/v47/outrider/outrider/OUTRIDER_results.tsv'
+outrider_f2 = './drop/output/processed_results/aberrant_expression/v47/outrider/outrider/OUTRIDER_results.tsv'
 
 
 def tabix_query(file_fn, chrom_fn, start_fn, end_fn):
